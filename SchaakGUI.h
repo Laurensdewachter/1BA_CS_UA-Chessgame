@@ -10,6 +10,7 @@
 #include "SchaakStuk.h"
 #include <QMessageBox>
 #include <QAction>
+#include <sstream>
 
 class SchaakGUI:public ChessWindow {
 public:

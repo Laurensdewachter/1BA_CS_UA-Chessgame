@@ -14,10 +14,13 @@ class Game;
 enum zw{zwart,wit};
 
 class SchaakStuk {zw kleur;
-public:
+protected:
     bool eersteZet;
+public:
     SchaakStuk(zw kleur): kleur(kleur), eersteZet(true) {}
     ~SchaakStuk() {}
+
+    void setEersteZet() {eersteZet = false;}
 
     virtual Piece piece() const=0;      // Verander deze functie niet!
                                         // Deze functie wordt gebruikt door

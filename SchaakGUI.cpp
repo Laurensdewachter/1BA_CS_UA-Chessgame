@@ -18,6 +18,7 @@ SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true) {
 // geklikt wordt. x,y geeft de positie aan waar er geklikt
 // werd; r is de 0-based rij, k de 0-based kolom
 void SchaakGUI::clicked(int r, int k) {
+    if (g.getFinished()) return;
     if (firstClick) {
         if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
             selectedPiece = g.getPiece(r, k);
@@ -26,10 +27,20 @@ void SchaakGUI::clicked(int r, int k) {
     } else {
         pair<int, int> temp = {r, k};
         if (temp != selectedPiece->getLocation(g)) {
-            bool moved = g.move(selectedPiece, r, k);
+            try {
+                g.move(selectedPiece, r, k);
+            } catch (schaakError& e) {
+                message("Deze zet is ongeldig");
+                firstClick = true;
+                return;
+            } catch (schaakMatError& e) {
+                if (e.getWinner() == wit) message("Schaakmat! Wit heeft gewonnen");
+                else message("Schaakmat! Zwart heeft gewonnen");
+                g.setFinished();
+                return;
+            } catch (verplaatsingsError& e) {return;}
             SchaakGUI::update();
-            if (moved) g.changeBeurt();
-            else message("Deze zet is ongeldig");
+            g.changeBeurt();
         }
         firstClick = true;
     }

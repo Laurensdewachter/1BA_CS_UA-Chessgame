@@ -17,10 +17,14 @@ class Game {
     zw aanBeurt;
     SchaakStuk* koningWit;
     SchaakStuk* koningZwart;
+    bool finished;
 
 public:
     Game();
     ~Game();
+
+    bool getFinished() const {return finished;}
+    void setFinished() {finished = true;}
 
     bool move(SchaakStuk* s,int r, int k); // Verplaats stuk s naar rij r en kolom k
 
@@ -36,6 +40,24 @@ public:
     void changeBeurt();
 
     vector<SchaakStuk*> getPieces(zw kleur);
+    bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
+};
+
+class schaakError : public exception {
+public:
+    schaakError() {}
+};
+
+class schaakMatError : public exception {
+    zw winner;
+public:
+    schaakMatError(zw k) : winner(k) {}
+    zw getWinner() const {return winner;}
+};
+
+class verplaatsingsError : public exception {
+public:
+    verplaatsingsError() {}
 };
 
 

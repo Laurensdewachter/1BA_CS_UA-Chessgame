@@ -5,7 +5,7 @@
 
 #include "game.h"
 
-Game::Game() : aanBeurt(wit) {
+Game::Game() : aanBeurt(wit), finished(false) {
     for (int i = 0; i < 64; i++) schaakbord[i] = nullptr;
 }
 
@@ -40,33 +40,43 @@ void Game::setStartBord() {
 // en verandert er niets aan het schaakbord.
 // Anders wordt de move uitgevoerd en wordt true teruggegeven
 bool Game::move(SchaakStuk* s, int r, int k) {
+    // mogelijke zetten van het stuk verzamelen
     vector<pair<int, int>> mogelijke_zetten = s->geldige_zetten(*this);
+    // aangeklikte locatie in een pair<int, int> zetten
     pair<int, int> vergelijker;
     vergelijker.first = r;
     vergelijker.second = k;
+    // controleren of de aangeklikte locatie een geldige zet is
     if (any_of(mogelijke_zetten.begin(), mogelijke_zetten.end(), [vergelijker](pair<int, int> i){return i == vergelijker;})) {
+        // het stuk dat eventueel gepakt zou worden opslaan als stuk_op_loc
         SchaakStuk *stuk_op_loc = Game::getPiece(r, k);
+        // de huidige locatie van het te verplaatsen stuk opslaan als loc
         pair<int, int> loc = s->getLocation(*this);
+        // de huidige locatie leeg maken
         Game::setPiece(loc.first, loc.second, nullptr);
+        // het stuk verplaatsen naar de nieuwe locatie
         Game::setPiece(r, k, s);
-        if (s->getKleur() == wit) {
-            if (Game::schaak(wit)) {
-                Game::setPiece(loc.first, loc.second, s);
-                Game::setPiece(r, k, stuk_op_loc);
-                return false;
-            }
-        } else {
-            if (Game::schaak(zwart)) {
-                Game::setPiece(loc.first, loc.second, s);
-                Game::setPiece(r, k, stuk_op_loc);
-                return false;
-            }
+        zw kleur = s->getKleur();
+        // nakijken of de speler die juist (probeerde) te zetten zichzelf niet schaak heeft gezet/laten staan
+        if (Game::schaak(kleur)) {
+            // als de speler schaak staat moet de zet ongedaan gemaakt worden
+            Game::setPiece(loc.first, loc.second, s);
+            Game::setPiece(r, k, stuk_op_loc);
+            // throw een schaakError
+            throw schaakError();
         }
-        s->eersteZet = false;
+        zw kleur_inv = wit;
+        if (kleur == wit) kleur_inv = zwart;
+        // nakijken of de speler zijn tegenstander schaakmat heeft gezet
+        if (Game::schaakmat(kleur_inv)) {
+            // throw een schaakMatError
+            throw schaakMatError(kleur);
+        }
+        s->setEersteZet();
         delete stuk_op_loc;
         return true;
     }
-    return false;
+    throw verplaatsingsError();
 }
 
 // Geeft true als kleur schaak staat
@@ -89,8 +99,6 @@ bool Game::schaak(zw kleur) {
 
 // Geeft true als kleur schaakmat staat
 bool Game::schaakmat(zw kleur) {
-    // nakijken of de gegeven kleur schaak staat
-    if (not schaak(kleur)) return false;
     // koning en locatie van koning in globale variabelen zetten
     SchaakStuk* koning;
     if (kleur == wit) koning = koningWit;
@@ -98,16 +106,31 @@ bool Game::schaakmat(zw kleur) {
     pair<int, int> loc = koning->getLocation(*this);
     // nakijken of de koning kan verplaatsen
     for (auto i : koning->geldige_zetten(*this)) {
-        SchaakStuk* temp = Game::getPiece(i.first, i.second);
-        Game::setPiece(i.first, i.second, koning);
-        if (not schaak(kleur)) {
-            Game::setPiece(loc.first, loc.second, koning);
-            Game::setPiece(i.first, i.second, temp);
-            return false;
-        }
-        Game::setPiece(loc.first, loc.second, koning);
-        Game::setPiece(i.first, i.second, temp);
+        if (not Game::quickCheckSchaak(kleur, koning, i.first, i.second)) return false;
     }
+    // nakijken of een ander stuk het aanvallende stuk kan blokkeren
+    vector<SchaakStuk*> pieces = Game::getPieces(kleur);
+    for (auto i : pieces) {
+        vector<pair<int, int>> zetten = i->geldige_zetten(*this);
+        for (auto j : zetten) {
+            if (not Game::quickCheckSchaak(kleur, i, j.first, j.second)) return false;
+        }
+    }
+    return true;
+}
+
+bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
+    pair<int, int> loc = s->getLocation(*this);
+    SchaakStuk* temp = Game::getPiece(r, k);
+    Game::setPiece(r, k, s);
+    if (not schaak(kleur)) {
+        Game::setPiece(loc.first, loc.second, s);
+        Game::setPiece(r, k, temp);
+        return false;
+    }
+    Game::setPiece(loc.first, loc.second, s);
+    Game::setPiece(r, k, temp);
+    return true;
 }
 
 // Geeft true als kleur pat staat
