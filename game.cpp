@@ -90,8 +90,24 @@ bool Game::schaak(zw kleur) {
 // Geeft true als kleur schaakmat staat
 bool Game::schaakmat(zw kleur) {
     // nakijken of de gegeven kleur schaak staat
-    if ((kleur == wit && not schaak(wit)) || (kleur == zwart) && not schaak(zwart)) return false;
-
+    if (not schaak(kleur)) return false;
+    // koning en locatie van koning in globale variabelen zetten
+    SchaakStuk* koning;
+    if (kleur == wit) koning = koningWit;
+    else koning = koningZwart;
+    pair<int, int> loc = koning->getLocation(*this);
+    // nakijken of de koning kan verplaatsen
+    for (auto i : koning->geldige_zetten(*this)) {
+        SchaakStuk* temp = Game::getPiece(i.first, i.second);
+        Game::setPiece(i.first, i.second, koning);
+        if (not schaak(kleur)) {
+            Game::setPiece(loc.first, loc.second, koning);
+            Game::setPiece(i.first, i.second, temp);
+            return false;
+        }
+        Game::setPiece(loc.first, loc.second, koning);
+        Game::setPiece(i.first, i.second, temp);
+    }
 }
 
 // Geeft true als kleur pat staat
