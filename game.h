@@ -22,7 +22,7 @@ public:
     ~Game();
 
     bool getFinished() const {return finished;}
-    void setFinished() {finished = true;}
+    void setFinished(bool f) {finished = f;}
 
     void clearBord();
     void setKoning(zw kleur, SchaakStuk* koning);

@@ -34,17 +34,22 @@ void SchaakGUI::clicked(int r, int k) {
                 return;
             } catch (schaakMatError& e) {
                 SchaakGUI::update();
-                if (e.getWinner() == wit) message("Schaakmat! Wit heeft gewonnen");
-                else message("Schaakmat! Zwart heeft gewonnen");
-                g.setFinished();
-                SchaakGUI::clearTiles();
+                if (e.getWinner() == wit) {
+                    SchaakGUI::clearTiles();
+                    message("Schaakmat! Wit heeft gewonnen");
+                }
+                else {
+                    SchaakGUI::clearTiles();
+                    message("Schaakmat! Zwart heeft gewonnen");
+                }
+                g.setFinished(true);
                 return;
             } catch (verplaatsingsError& e) {return;}
             catch (patError& e) {
                 SchaakGUI::update();
-                message("Gelijkspel!");
                 SchaakGUI::clearTiles();
-                g.setFinished();
+                message("Gelijkspel!");
+                g.setFinished(true);
             }
             g.changeBeurt();
         }
@@ -62,11 +67,12 @@ void SchaakGUI::visualize(int r, int k, SchaakStuk* s) {
         if (SchaakGUI::displayMoves() && g.getPiece(i.first, i.second) == nullptr) {
             SchaakGUI::setTileFocus(i.first, i.second, true);
             focusedTiles.push_back(i);
-        } else if (SchaakGUI::displayThreats()) {
+        } if (SchaakGUI::displayKills() && g.getPiece(i.first, i.second) != nullptr) {
             setPieceThreat(i.first, i.second, true);
             threatenedPieces.push_back(i);
-        } if (SchaakGUI::displayKills() && g.bedreigdVak(i.first, i.second, s->getKleur())) {
-            setTileThreat(i.first, i.second, true);
+        } if (SchaakGUI::displayThreats() && g.bedreigdVak(i.first, i.second, s->getKleur())) {
+            SchaakGUI::setTileFocus(i.first, i.second, true);
+            SchaakGUI::setTileThreat(i.first, i.second, true);
             threatenedTiles.push_back(i);
         }
     }
@@ -76,7 +82,10 @@ void SchaakGUI::clearTiles() {
     SchaakGUI::setTileSelect(selectedTile.first, selectedTile.second, false);
     for (auto i : focusedTiles) SchaakGUI::setTileFocus(i.first, i.second, false);
     for (auto i : threatenedPieces) SchaakGUI::setPieceThreat(i.first, i.second, false);
-    for (auto i : threatenedTiles) SchaakGUI::setTileThreat(i.first, i.second, false);
+    for (auto i : threatenedTiles) {
+        SchaakGUI::setTileThreat(i.first, i.second, false);
+        SchaakGUI::setTileFocus(i.first, i.second, false);
+    }
 }
 
 void SchaakGUI::newGame()
@@ -154,6 +163,7 @@ void SchaakGUI::open() {
         }
     }
     update();
+    g.setFinished(false);
     if (g.getBeurt() == wit) message("Wit is aan beurt");
     else message("Zwart is aan beurt");
 }
