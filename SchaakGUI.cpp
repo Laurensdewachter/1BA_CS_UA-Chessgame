@@ -90,13 +90,8 @@ void SchaakGUI::open() {
                 }
                 debugstring += "\n";
             }
-            if (turn == "w") {
-                g.setBeurt(wit);
-                message("Wit is aan beurt");
-            } else {
-                g.setBeurt(zwart);
-                message("Zwart is aan beurt");
-            }
+            if (turn == "w") g.setBeurt(wit);
+            else g.setBeurt(zwart);
             g.clearBord();
             for (int r = 0; r < 8; r++) {
                 for (int k = 0; k < 8; k++) {
@@ -131,6 +126,8 @@ void SchaakGUI::open() {
         }
     }
     update();
+    if (g.getBeurt() == wit) message("Wit is aan beurt");
+    else message("Zwart is aan beurt");
 }
 
 
