@@ -59,19 +59,15 @@ void SchaakGUI::save() {
     QFile file;
     if (openFileToWrite(file)) {
         QDataStream out(&file);
-        out << QString("Rb") << QString("Hb") << QString("Bb") << QString("Qb") << QString("Kb") << QString("Bb") << QString("Hb") << QString("Rb");
-        for  (int i=0;i<8;i++) {
-            out << QString("Pb");
-        }
-        for  (int r=3;r<7;r++) {
-            for (int k=0;k<8;k++) {
-                out << QString(".");
+        if (g.getBeurt() == wit) out << QString("w");
+        else out << QString("b");
+        for (int r = 0; r < 8; r++) {
+            for (int k = 0; k < 8; k++) {
+                SchaakStuk* piece = g.getPiece(r, k);
+                if (piece == nullptr) out << QString(".");
+                else out << QString(piece->type());
             }
         }
-        for  (int i=0;i<8;i++) {
-            out << QString("Pw");
-        }
-        out << QString("Rw") << QString("Hw") << QString("Bw") << QString("Qw") << QString("Kw") << QString("Bw") << QString("Hw") << QString("Rw");
     }
 }
 
@@ -81,18 +77,55 @@ void SchaakGUI::open() {
         try {
             QDataStream in(&file);
             QString debugstring;
-            for (int r=0;r<8;r++) {
-                for (int k=0;k<8;k++) {
+            QString turn;
+            in >> turn;
+            for (int r = 0; r < 8; r++) {
+                for (int k = 0; k < 8; k++) {
                     QString piece;
                     in >> piece;
                     debugstring += "\t" + piece;
-                    if (in.status()!=QDataStream::Ok) {
+                    if (in.status() != QDataStream::Ok) {
                         throw QString("Invalid File Format");
                     }
                 }
                 debugstring += "\n";
             }
-            message(debugstring);
+            if (turn == "w") {
+                g.setBeurt(wit);
+                message("Wit is aan beurt");
+            } else {
+                g.setBeurt(zwart);
+                message("Zwart is aan beurt");
+            }
+            g.clearBord();
+            for (int r = 0; r < 8; r++) {
+                for (int k = 0; k < 8; k++) {
+                    debugstring.remove(0, 1);
+                    QChar front = debugstring.front();
+                    debugstring.remove(0, 1);
+                    QChar colour;
+                    zw kleur;
+                    if (front != ".") {
+                        colour = debugstring.front();
+                        debugstring.remove(0, 1);
+                        if (colour == "w") kleur = wit;
+                        else kleur = zwart;
+                    } else {
+                        g.setPiece(r, k, nullptr);
+                    }
+                    if (front == "P") g.setPiece(r, k, new Pion(kleur));
+                    else if (front == "R") g.setPiece(r, k, new Toren(kleur));
+                    else if (front == "H") g.setPiece(r, k, new Paard(kleur));
+                    else if (front == "B") g.setPiece(r, k, new Loper(kleur));
+                    else if (front == "K") {
+                        Koning* koning = new Koning(kleur);
+                        g.setPiece(r, k, koning);
+                        g.setKoning(kleur, koning);
+                    }
+                    else if (front == "Q") g.setPiece(r, k, new Koningin(kleur));
+                }
+                debugstring.remove(0, 1);
+            }
         } catch (QString& Q) {
             message(Q);
         }
