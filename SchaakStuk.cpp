@@ -40,18 +40,18 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
             zetten.push_back(move);
         }
         // nakijken of er een stuk schuin links voor de pion staat
-        if (k > 0 && g.getPiece(r-1, k-1) != nullptr) {
+        if (k > 0 && g.getPiece(r-1, k-1) != nullptr && g.getPiece(r-1, k-1)->getKleur() != SchaakStuk::getKleur()) {
             move.first = r-1;
             move.second = k-1;
             zetten.push_back(move);
         }
         // nakijken of er een stuk schuin rechts voor de pion staat
-        if (k < 7 && g.getPiece(r-1, k+1) != nullptr) {
+        if (k < 7 && g.getPiece(r-1, k+1) != nullptr && g.getPiece(r-1, k+1)->getKleur() != SchaakStuk::getKleur()) {
             move.first = r-1;
             move.second = k+1;
             zetten.push_back(move);
         }
-        if (r == 6 && g.getPiece(r-2, k) == nullptr) {
+        if (r == 6 && g.getPiece(r-1, k) == nullptr && g.getPiece(r-2, k) == nullptr) {
             move.first = r-2;
             move.second = k;
             zetten.push_back(move);
@@ -64,18 +64,18 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
             zetten.push_back(move);
         }
         // nakijken of er een stuk schuin links voor de pion staat
-        if (k > 0 && g.getPiece(r+1, k-1) != nullptr) {
+        if (k > 0 && g.getPiece(r+1, k-1) != nullptr && g.getPiece(r+1, k-1)->getKleur() != SchaakStuk::getKleur()) {
             move.first = r+1;
             move.second = k-1;
             zetten.push_back(move);
         }
         // nakijken of er een stuk schuin rechts voor de pion staat
-        if (k < 7 && g.getPiece(r+1, k+1) != nullptr) {
+        if (k < 7 && g.getPiece(r+1, k+1) != nullptr && g.getPiece(r+1, k+1)->getKleur() != SchaakStuk::getKleur()) {
             move.first = r+1;
             move.second = k+1;
             zetten.push_back(move);
         }
-        if (r == 1 && g.getPiece(r+2, k) == nullptr) {
+        if (r == 1 && g.getPiece(r+1, k) == nullptr && g.getPiece(r+2, k) == nullptr) {
             move.first = r+2;
             move.second = k;
             zetten.push_back(move);

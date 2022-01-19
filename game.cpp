@@ -69,27 +69,27 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         // het stuk verplaatsen naar de nieuwe locatie
         Game::setPiece(r, k, s);
         zw kleur = s->getKleur();
+        zw kleur_inv = wit;
+        if (kleur == wit) kleur_inv = zwart;
         // nakijken of de speler die juist (probeerde) te zetten zichzelf niet schaak heeft gezet/laten staan
         if (Game::schaak(kleur)) {
+            // nakijken of de speler zijn tegenstander schaakmat heeft gezet
+            if (Game::schaakmat(kleur_inv)) {
+                delete stuk_op_loc;
+                // throw een schaakMatError
+                throw schaakMatError(kleur);
+            }
             // als de speler schaak staat moet de zet ongedaan gemaakt worden
             Game::setPiece(loc.first, loc.second, s);
             Game::setPiece(r, k, stuk_op_loc);
             // throw een schaakError
             throw schaakError();
         }
-        zw kleur_inv = wit;
-        if (kleur == wit) kleur_inv = zwart;
         // nakijken of de speler zijn tegenstander pat heeft gezet
         if (Game::pat(kleur_inv)) {
             delete stuk_op_loc;
             // throw een patError
             throw patError();
-        }
-        // nakijken of de speler zijn tegenstander schaakmat heeft gezet
-        if (Game::schaakmat(kleur_inv)) {
-            delete stuk_op_loc;
-            // throw een schaakMatError
-            throw schaakMatError(kleur);
         }
         delete stuk_op_loc;
         return true;
@@ -176,10 +176,10 @@ bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
 // dit resulteert in een gelijkspel)
 bool Game::pat(zw kleur) {
     for (auto i : Game::getPieces(kleur)) {
-        if (not i->geldige_zetten(*this).empty()) {
-            for (auto j : i->geldige_zetten(*this)) {
-                if (Game::quickCheckSchaak(kleur, i, j.first, j.second)) break;
-                return false;
+        vector<pair<int, int>> zetten = i->geldige_zetten(*this);
+        if (not zetten.empty()) {
+            for (auto j : zetten) {
+                if (not Game::quickCheckSchaak(kleur, i, j.first, j.second)) return false;
             }
         }
     }

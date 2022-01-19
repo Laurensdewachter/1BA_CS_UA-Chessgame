@@ -41,6 +41,7 @@ void SchaakGUI::clicked(int r, int k) {
             catch (patError& e) {
                 SchaakGUI::update();
                 message("Gelijkspel!");
+                g.setFinished();
             }
             SchaakGUI::update();
             g.changeBeurt();
