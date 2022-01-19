@@ -55,6 +55,11 @@ public:
     zw getWinner() const {return winner;}
 };
 
+class patError : public exception {
+public:
+    patError() {}
+};
+
 class verplaatsingsError : public exception {
 public:
     verplaatsingsError() {}

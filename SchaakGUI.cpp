@@ -40,6 +40,10 @@ void SchaakGUI::clicked(int r, int k) {
                 g.setFinished();
                 return;
             } catch (verplaatsingsError& e) {return;}
+            catch (patError& e) {
+                SchaakGUI::update();
+                message("Gelijkspel!");
+            }
             SchaakGUI::update();
             g.changeBeurt();
         }
