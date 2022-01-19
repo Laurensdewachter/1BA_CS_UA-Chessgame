@@ -18,19 +18,10 @@ SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true) {
 void SchaakGUI::clicked(int r, int k) {
     if (g.getFinished()) return;
     if (firstClick) {
+        // nakijken of het aangeklikte vak een stuk van de juiste kleur bevat
         if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
             selectedPiece = g.getPiece(r, k);
-            selectedTile = {r, k};
-            SchaakGUI::setTileSelect(r, k, true);
-            for (auto i : selectedPiece->geldige_zetten(g)) {
-                if (g.getPiece(i.first, i.second) == nullptr) {
-                    SchaakGUI::setTileFocus(i.first, i.second, true);
-                    focusedTiles.push_back(i);
-                } else {
-                    setPieceThreat(i.first, i.second, true);
-                    threatenedPieces.push_back(i);
-                }
-            }
+            SchaakGUI::visualize(r, k, selectedPiece);
             firstClick = false;
         }
     } else {
@@ -61,6 +52,24 @@ void SchaakGUI::clicked(int r, int k) {
         firstClick = true;
     }
     SchaakGUI::update();
+}
+
+// Kleurt de juiste vakken en stukken op het bord
+void SchaakGUI::visualize(int r, int k, SchaakStuk* s) {
+    selectedTile = {r, k};
+    SchaakGUI::setTileSelect(r, k, true);
+    for (auto i : selectedPiece->geldige_zetten(g)) {
+        if (SchaakGUI::displayMoves() && g.getPiece(i.first, i.second) == nullptr) {
+            SchaakGUI::setTileFocus(i.first, i.second, true);
+            focusedTiles.push_back(i);
+        } else if (SchaakGUI::displayThreats()) {
+            setPieceThreat(i.first, i.second, true);
+            threatenedPieces.push_back(i);
+        } if (SchaakGUI::displayKills() && g.bedreigdVak(i.first, i.second, s->getKleur())) {
+            setTileThreat(i.first, i.second, true);
+            threatenedTiles.push_back(i);
+        }
+    }
 }
 
 void SchaakGUI::clearTiles() {

@@ -26,6 +26,7 @@ private:
     vector<pair<int, int>> threatenedTiles;
 
     void clearTiles();
+    void visualize(int r, int k, SchaakStuk* s);
 
     void clicked(int x, int y) override;
     void newGame() override;

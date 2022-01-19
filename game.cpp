@@ -217,3 +217,26 @@ vector<SchaakStuk*> Game::getPieces(zw kleur) {
     }
     return pieces;
 }
+
+bool Game::bedreigdVak(int r, int k, zw kleur) {
+    SchaakStuk* temp = Game::getPiece(r, k);
+    Pion* temp_piece = new Pion(kleur);
+    Game::setPiece(r, k, temp_piece);
+    pair<int, int> vergelijker = {r, k};
+
+    zw kleur_inv;
+    if (kleur == wit) kleur_inv = zwart;
+    else kleur_inv = wit;
+
+    vector<pair<int, int>> zetten;
+    for (auto i : Game::getPieces(kleur_inv)) for (auto j : i->geldige_zetten(*this)) zetten.push_back(j);
+
+    if (any_of(zetten.begin(), zetten.end(), [vergelijker](pair<int, int> i){return vergelijker == i;})) {
+        Game::setPiece(r, k, temp);
+        delete temp_piece;
+        return true;
+    }
+    Game::setPiece(r, k, temp);
+    delete temp_piece;
+    return false;
+}

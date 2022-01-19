@@ -43,6 +43,7 @@ public:
 
     vector<SchaakStuk*> getPieces(zw kleur);
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
+    bool bedreigdVak(int r, int k, zw kleur);
 };
 
 class schaakError : public exception {
