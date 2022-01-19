@@ -556,7 +556,7 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
         for (int i = 1; i < 7; i++) {
             move.first = r + i;
             move.second = k + i;
-            if (move.first < 0 || move.second < 0) break;
+            if (move.first > 7 || move.second > 7) break;
             if (g.getPiece(move.first, move.second) == nullptr) zetten.push_back(move);
             else if (g.getPiece(move.first, move.second)->getKleur() != SchaakStuk::getKleur()) {
                 zetten.push_back(move);
