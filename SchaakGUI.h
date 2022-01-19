@@ -20,6 +20,12 @@ private:
     Game g;
     bool firstClick;
     SchaakStuk* selectedPiece;
+    pair<int, int> selectedTile;
+    vector<pair<int, int>> focusedTiles;
+    vector<pair<int, int>> threatenedPieces;
+    vector<pair<int, int>> threatenedTiles;
+
+    void clearTiles();
 
     void clicked(int x, int y) override;
     void newGame() override;

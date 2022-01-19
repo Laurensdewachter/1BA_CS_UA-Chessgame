@@ -20,6 +20,17 @@ void SchaakGUI::clicked(int r, int k) {
     if (firstClick) {
         if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
             selectedPiece = g.getPiece(r, k);
+            selectedTile = {r, k};
+            SchaakGUI::setTileSelect(r, k, true);
+            for (auto i : selectedPiece->geldige_zetten(g)) {
+                if (g.getPiece(i.first, i.second) == nullptr) {
+                    SchaakGUI::setTileFocus(i.first, i.second, true);
+                    focusedTiles.push_back(i);
+                } else {
+                    setPieceThreat(i.first, i.second, true);
+                    threatenedPieces.push_back(i);
+                }
+            }
             firstClick = false;
         }
     } else {
@@ -29,25 +40,34 @@ void SchaakGUI::clicked(int r, int k) {
                 g.move(selectedPiece, r, k);
             } catch (schaakError& e) {
                 message("Deze zet is ongeldig");
-                firstClick = true;
                 return;
             } catch (schaakMatError& e) {
                 SchaakGUI::update();
                 if (e.getWinner() == wit) message("Schaakmat! Wit heeft gewonnen");
                 else message("Schaakmat! Zwart heeft gewonnen");
                 g.setFinished();
+                SchaakGUI::clearTiles();
                 return;
             } catch (verplaatsingsError& e) {return;}
             catch (patError& e) {
                 SchaakGUI::update();
                 message("Gelijkspel!");
+                SchaakGUI::clearTiles();
                 g.setFinished();
             }
-            SchaakGUI::update();
             g.changeBeurt();
         }
+        SchaakGUI::clearTiles();
         firstClick = true;
     }
+    SchaakGUI::update();
+}
+
+void SchaakGUI::clearTiles() {
+    SchaakGUI::setTileSelect(selectedTile.first, selectedTile.second, false);
+    for (auto i : focusedTiles) SchaakGUI::setTileFocus(i.first, i.second, false);
+    for (auto i : threatenedPieces) SchaakGUI::setPieceThreat(i.first, i.second, false);
+    for (auto i : threatenedTiles) SchaakGUI::setTileThreat(i.first, i.second, false);
 }
 
 void SchaakGUI::newGame()
