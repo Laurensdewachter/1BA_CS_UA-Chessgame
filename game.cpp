@@ -69,6 +69,7 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         if (kleur == wit) kleur_inv = zwart;
         // nakijken of de speler zijn tegenstander schaakmat heeft gezet
         if (Game::schaakmat(kleur_inv)) {
+            delete stuk_op_loc;
             // throw een schaakMatError
             throw schaakMatError(kleur);
         }
@@ -123,6 +124,7 @@ bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
     pair<int, int> loc = s->getLocation(*this);
     SchaakStuk* temp = Game::getPiece(r, k);
     Game::setPiece(r, k, s);
+    Game::setPiece(loc.first, loc.second, nullptr);
     if (not schaak(kleur)) {
         Game::setPiece(loc.first, loc.second, s);
         Game::setPiece(r, k, temp);

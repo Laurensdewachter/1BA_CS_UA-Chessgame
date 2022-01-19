@@ -34,6 +34,7 @@ void SchaakGUI::clicked(int r, int k) {
                 firstClick = true;
                 return;
             } catch (schaakMatError& e) {
+                SchaakGUI::update();
                 if (e.getWinner() == wit) message("Schaakmat! Wit heeft gewonnen");
                 else message("Schaakmat! Zwart heeft gewonnen");
                 g.setFinished();
