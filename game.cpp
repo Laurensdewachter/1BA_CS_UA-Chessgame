@@ -7,7 +7,9 @@
 
 Game::Game() : aanBeurt(wit), finished(false) {}
 
-Game::~Game() {}
+Game::~Game() {
+    Game::clearBord();
+}
 
 // Zet het bord klaar; voeg de stukken op de juiste plaats toe
 void Game::setStartBord() {
@@ -31,6 +33,20 @@ void Game::setStartBord() {
     schaakbord[61] = new Loper(wit);
     schaakbord[62] = new Paard(wit);
     schaakbord[63] = new Toren(wit);
+}
+
+// Verwijdert alle stukken van het schaakbord
+void Game::clearBord() {
+    for (int i = 0; i < 64; i++) {
+        delete schaakbord[i];
+        schaakbord[i] = nullptr;
+    }
+    koningWit = koningZwart = nullptr;
+}
+
+void Game::setKoning(zw kleur, SchaakStuk* koning) {
+    if (kleur == wit) koningWit = koning;
+    else koningZwart = koning;
 }
 
 // Verplaats stuk s naar positie (r,k)
@@ -77,7 +93,6 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             // throw een schaakMatError
             throw schaakMatError(kleur);
         }
-        s->setEersteZet();
         delete stuk_op_loc;
         return true;
     }
@@ -191,6 +206,8 @@ void Game::changeBeurt() {
     if (aanBeurt == wit) aanBeurt = zwart;
     else aanBeurt = wit;
 }
+
+void Game::setBeurt(zw kleur) {aanBeurt = kleur;}
 
 vector<SchaakStuk*> Game::getPieces(zw kleur) {
     vector<SchaakStuk*> pieces;

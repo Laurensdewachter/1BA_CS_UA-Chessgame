@@ -54,7 +54,7 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
             move.second = k+1;
             zetten.push_back(move);
         }
-        if (eersteZet && g.getPiece(r-2, k) == nullptr) {
+        if (r == 6 && g.getPiece(r-2, k) == nullptr) {
             move.first = r-2;
             move.second = k;
             zetten.push_back(move);
@@ -78,7 +78,7 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
             move.second = k+1;
             zetten.push_back(move);
         }
-        if (eersteZet && g.getPiece(r+2, k) == nullptr) {
+        if (r == 1 && g.getPiece(r+2, k) == nullptr) {
             move.first = r+2;
             move.second = k;
             zetten.push_back(move);
@@ -568,4 +568,34 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
         }
     }
     return zetten;
+}
+
+char* Pion::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Pw";
+    return "Pb";
+}
+
+char* Toren::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Rw";
+    return "Rb";
+}
+
+char* Paard::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Hw";
+    return "Hb";
+}
+
+char* Loper::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Bw";
+    return "Bb";
+}
+
+char* Koning::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Kw";
+    return "Kb";
+}
+
+char* Koningin::type() const {
+    if (SchaakStuk::getKleur() == wit) return "Qw";
+    return "Qb";
 }

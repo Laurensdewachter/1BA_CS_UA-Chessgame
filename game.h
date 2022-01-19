@@ -26,6 +26,9 @@ public:
     bool getFinished() const {return finished;}
     void setFinished() {finished = true;}
 
+    void clearBord();
+    void setKoning(zw kleur, SchaakStuk* koning);
+
     bool move(SchaakStuk* s,int r, int k); // Verplaats stuk s naar rij r en kolom k
 
     bool schaak(zw kleur);
@@ -38,6 +41,7 @@ public:
 
     zw getBeurt() const {return aanBeurt;}
     void changeBeurt();
+    void setBeurt(zw kleur);
 
     vector<SchaakStuk*> getPieces(zw kleur);
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);

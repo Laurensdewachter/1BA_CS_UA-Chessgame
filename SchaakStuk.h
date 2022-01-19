@@ -14,13 +14,9 @@ class Game;
 enum zw{zwart,wit};
 
 class SchaakStuk {zw kleur;
-protected:
-    bool eersteZet;
 public:
-    SchaakStuk(zw kleur): kleur(kleur), eersteZet(true) {}
+    SchaakStuk(zw kleur): kleur(kleur) {}
     ~SchaakStuk() {}
-
-    void setEersteZet() {eersteZet = false;}
 
     virtual Piece piece() const=0;      // Verander deze functie niet!
                                         // Deze functie wordt gebruikt door
@@ -31,6 +27,8 @@ public:
 
     virtual vector<pair<int, int>> geldige_zetten(Game &g) = 0;
 
+    virtual char* type() const = 0;
+
     pair<int, int> getLocation(Game &g) const;
 };
 
@@ -40,6 +38,8 @@ public:
     virtual Piece piece() const override {
         return Piece(Piece::Pawn,getKleur()==wit?Piece::White:Piece::Black);
     }
+
+    char* type() const;
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
@@ -52,6 +52,8 @@ public:
         return Piece(Piece::Rook,getKleur()==wit?Piece::White:Piece::Black);
     }
 
+    char* type() const;
+
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
 
@@ -62,6 +64,8 @@ public:
     Piece piece() const override {
         return Piece(Piece::Knight,getKleur()==wit?Piece::White:Piece::Black);
     }
+
+    char* type() const;
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
@@ -74,6 +78,8 @@ public:
         return Piece(Piece::Bishop,getKleur()==wit?Piece::White:Piece::Black);
     }
 
+    char* type() const;
+
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
 
@@ -85,6 +91,8 @@ public:
         return Piece(Piece::King,getKleur()==wit?Piece::White:Piece::Black);
     }
 
+    char* type() const;
+
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
 
@@ -95,6 +103,8 @@ public:
     Piece piece() const override {
         return Piece(Piece::Queen,getKleur()==wit?Piece::White:Piece::Black);
     }
+
+    char* type() const;
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
 };
