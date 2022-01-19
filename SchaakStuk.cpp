@@ -1,8 +1,5 @@
 //  Student: Laurens De Wachter
-//  Student: Laurens De Wachter
 //  Rolnummer: r0214686
-//  Opmerkingen:
-//
 
 #include "SchaakStuk.h"
 #include "game.h"

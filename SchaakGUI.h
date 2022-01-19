@@ -1,7 +1,5 @@
 //  Student: Laurens De Wachter
 //  Rolnummer: r0214686
-//  Opmerkingen:
-//
 
 #ifndef SCHAKEN_SCHAAKGUI_H
 #define SCHAKEN_SCHAAKGUI_H

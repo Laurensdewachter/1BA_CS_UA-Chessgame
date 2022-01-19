@@ -1,7 +1,5 @@
 //  Student: Laurens De Wachter
 //  Rolnummer: r0214686
-//  Opmerkingen:
-//
 
 #include "SchaakGUI.h"
 #include "guicode/message.h"
