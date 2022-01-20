@@ -27,6 +27,10 @@ pair<int, int> SchaakStuk::getLocation(Game &g) const {
     return loc;
 }
 
+bool SchaakStuk::getMoved() const {return hasMoved;}
+
+void SchaakStuk::setMoved(bool m) {hasMoved = m;}
+
 
 vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
     vector<pair<int, int>> zetten;

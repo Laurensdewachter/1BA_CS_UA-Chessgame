@@ -104,6 +104,8 @@ void SchaakGUI::newGame() {
         g.deleteHistory();
         g.clearBord();
         g.setStartBord();
+        firstClick = true;
+        SchaakGUI::clearTiles();
         SchaakGUI::update();
     }
 }
@@ -204,8 +206,8 @@ void SchaakGUI::redo() {
 }
 
 void SchaakGUI::visualizationChange() {
-    /*
-    QString visstring = QString(displayMoves()?"T":"F")+(displayKills()?"T":"F")+(displayThreats()?"T":"F");
-    message(QString("Visualization changed : ")+visstring);
-     */
+    if (not firstClick) {
+        clearTiles();
+        visualize(selectedTile.first, selectedTile.second, selectedPiece);
+    }
 }

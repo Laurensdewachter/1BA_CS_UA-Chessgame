@@ -111,6 +111,7 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         if (Game::schaak(kleur)) {
             // nakijken of de speler zijn tegenstander schaakmat heeft gezet
             if (Game::schaakmat(kleur_inv)) {
+                s->setMoved(true);
                 delete stuk_op_loc;
                 finished = true;
                 logState();
@@ -125,12 +126,14 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         }
         // nakijken of de speler zijn tegenstander pat heeft gezet
         if (Game::pat(kleur_inv)) {
+            s->setMoved(true);
             delete stuk_op_loc;
             finished = true;
             logState();
             // throw een patError
             throw patError();
         }
+        s->setMoved(true);
         delete stuk_op_loc;
         logState();
         return true;

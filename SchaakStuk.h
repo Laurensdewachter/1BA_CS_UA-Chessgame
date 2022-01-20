@@ -11,14 +11,18 @@ class Game;
 
 enum zw{zwart,wit};
 
-class SchaakStuk {zw kleur;
+class SchaakStuk {
+    zw kleur;
+    bool hasMoved;
 public:
-    SchaakStuk(zw kleur): kleur(kleur) {}
+    SchaakStuk(zw kleur): kleur(kleur), hasMoved(false) {}
     ~SchaakStuk() {}
 
     // Getters
     zw getKleur() const;
     pair<int, int> getLocation(Game &g) const;
+    bool getMoved() const;
+    void setMoved(bool m);
 
     virtual Piece piece() const=0;
 
