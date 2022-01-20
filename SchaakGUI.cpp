@@ -11,6 +11,17 @@ SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true) {
     SchaakGUI::update();
 }
 
+// Update de inhoud van de grafische weergave van het schaakbord (scene)
+// en maak het consistent met de game state in variabele g.
+void SchaakGUI::update() {
+    SchaakGUI::clearBoard();
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (g.getPiece(i, j) != nullptr) SchaakGUI::setItem(i, j, g.getPiece(i, j));
+        }
+    }
+}
+
 
 // Deze functie wordt opgeroepen telkens er op het schaakbord
 // geklikt wordt. x,y geeft de positie aan waar er geklikt
@@ -88,9 +99,10 @@ void SchaakGUI::clearTiles() {
     }
 }
 
-void SchaakGUI::newGame()
-{}
 
+void SchaakGUI::newGame() {
+
+}
 
 void SchaakGUI::save() {
     QFile file;
@@ -168,28 +180,15 @@ void SchaakGUI::open() {
     else message("Zwart is aan beurt");
 }
 
-
 void SchaakGUI::undo() {
     message("Je hebt undo gekozen");
 }
 
 void SchaakGUI::redo() {}
 
-
 void SchaakGUI::visualizationChange() {
+    /*
     QString visstring = QString(displayMoves()?"T":"F")+(displayKills()?"T":"F")+(displayThreats()?"T":"F");
     message(QString("Visualization changed : ")+visstring);
+     */
 }
-
-
-// Update de inhoud van de grafische weergave van het schaakbord (scene)
-// en maak het consistent met de game state in variabele g.
-void SchaakGUI::update() {
-    SchaakGUI::clearBoard();
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            if (g.getPiece(i, j) != nullptr) SchaakGUI::setItem(i, j, g.getPiece(i, j));
-        }
-    }
-}
-

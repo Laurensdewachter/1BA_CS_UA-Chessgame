@@ -13,7 +13,6 @@
 class SchaakGUI:public ChessWindow {
 public:
     SchaakGUI();
-
     void update();
 
 private:
@@ -25,17 +24,16 @@ private:
     vector<pair<int, int>> threatenedPieces;
     vector<pair<int, int>> threatenedTiles;
 
-    void clearTiles();
-    void visualize(int r, int k, SchaakStuk* s);
-
     void clicked(int x, int y) override;
+    void visualize(int r, int k, SchaakStuk* s);
+    void clearTiles();
+
     void newGame() override;
     void open() override;
     void save() override;
     void undo() override;
     void redo() override;
     void visualizationChange() override;
-
 /*  Overgeerfde functies van ChessWindow:
 
     void removeAllMarking();

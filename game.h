@@ -21,28 +21,27 @@ public:
     Game();
     ~Game();
 
-    bool getFinished() const {return finished;}
-    void setFinished(bool f) {finished = f;}
-
-    void clearBord();
+    // Getters & setters
+    void setStartBord();
+    zw getBeurt() const;
+    void setBeurt(zw kleur);
+    bool getFinished() const;
+    void setFinished(bool f);
+    SchaakStuk* getPiece(int r, int k);
+    void setPiece(int r, int k, SchaakStuk* s);
+    vector<SchaakStuk*> getPieces(zw kleur);
     void setKoning(zw kleur, SchaakStuk* koning);
 
-    bool move(SchaakStuk* s,int r, int k); // Verplaats stuk s naar rij r en kolom k
+    void clearBord();
+
+    bool move(SchaakStuk* s,int r, int k);
+    void changeBeurt();
 
     bool schaak(zw kleur);
     bool schaakmat(zw kleur);
     bool pat(zw kleur);
-    void setStartBord();
-
-    SchaakStuk* getPiece(int r, int k);
-    void setPiece(int r, int k, SchaakStuk* s);
-
-    zw getBeurt() const {return aanBeurt;}
-    void changeBeurt();
-    void setBeurt(zw kleur);
-
-    vector<SchaakStuk*> getPieces(zw kleur);
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
+
     bool bedreigdVak(int r, int k, zw kleur);
 };
 

@@ -4,6 +4,8 @@
 #include "SchaakStuk.h"
 #include "game.h"
 
+zw SchaakStuk::getKleur() const {return kleur;}
+
 pair<int, int> SchaakStuk::getLocation(Game &g) const {
     bool found = false;
     int r;
@@ -24,6 +26,7 @@ pair<int, int> SchaakStuk::getLocation(Game &g) const {
     loc.second = k;
     return loc;
 }
+
 
 vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
     vector<pair<int, int>> zetten;
@@ -566,6 +569,7 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     }
     return zetten;
 }
+
 
 char* Pion::type() const {
     if (SchaakStuk::getKleur() == wit) return "Pw";

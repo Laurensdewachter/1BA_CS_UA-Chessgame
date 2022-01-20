@@ -9,7 +9,6 @@ Game::~Game() {
     Game::clearBord();
 }
 
-// Zet het bord klaar; voeg de stukken op de juiste plaats toe
 void Game::setStartBord() {
     schaakbord[0] = new Toren(zwart);
     schaakbord[1] = new Paard(zwart);
@@ -33,6 +32,45 @@ void Game::setStartBord() {
     schaakbord[63] = new Toren(wit);
 }
 
+zw Game::getBeurt() const {return aanBeurt;}
+
+void Game::setBeurt(zw kleur) {aanBeurt = kleur;}
+
+bool Game::getFinished() const {return finished;}
+
+void Game::setFinished(bool f) {finished = f;}
+
+// Geeft een pointer naar het schaakstuk dat op rij r, kolom k staat
+// Als er geen schaakstuk staat op deze positie, geef nullptr terug
+SchaakStuk* Game::getPiece(int r, int k) {return schaakbord[r*8 + k];}
+
+// Zet het schaakstuk waar s naar verwijst neer op rij r, kolom k.
+// Als er al een schaakstuk staat, wordt het overschreven.
+// Bewaar in jouw datastructuur de *pointer* naar het schaakstuk,
+// niet het schaakstuk zelf.
+void Game::setPiece(int r, int k, SchaakStuk* s) {
+    schaakbord[r*8 + k] = s;
+}
+
+// Geeft alle stukken van `kleur` die nog op het bord staan
+vector<SchaakStuk*> Game::getPieces(zw kleur) {
+    vector<SchaakStuk*> pieces;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            SchaakStuk* piece = Game::getPiece(i, j);
+            if (piece != nullptr && piece->getKleur() == kleur) pieces.push_back(piece);
+        }
+    }
+    return pieces;
+}
+
+// Zet `koning` als de variabele `koningWit` of `koningZwart`
+void Game::setKoning(zw kleur, SchaakStuk* koning) {
+    if (kleur == wit) koningWit = koning;
+    else koningZwart = koning;
+}
+
+
 // Verwijdert alle stukken van het schaakbord
 void Game::clearBord() {
     for (int i = 0; i < 64; i++) {
@@ -42,12 +80,8 @@ void Game::clearBord() {
     koningWit = koningZwart = nullptr;
 }
 
-void Game::setKoning(zw kleur, SchaakStuk* koning) {
-    if (kleur == wit) koningWit = koning;
-    else koningZwart = koning;
-}
 
-// Verplaats stuk s naar positie (r,k)
+// Verplaats stuk s naar positie (r, k)
 // Als deze move niet mogelijk is, wordt de juiste soort error teruggegeven
 // en verandert er niets aan het schaakbord (uitgezonderd bij schaakmat. Dan wordt de zet wel gemaakt).
 // Anders wordt de move uitgevoerd en wordt true teruggegeven
@@ -97,7 +131,13 @@ bool Game::move(SchaakStuk* s, int r, int k) {
     throw verplaatsingsError();
 }
 
-// Geeft true als kleur schaak staat
+// Verander `aanBeurt` van kleur
+void Game::changeBeurt() {
+    if (aanBeurt == wit) aanBeurt = zwart;
+    else aanBeurt = wit;
+}
+
+// Geeft `true` als kleur schaak staat
 bool Game::schaak(zw kleur) {
     vector<SchaakStuk*> pieces;
     pair<int, int> loc;
@@ -121,7 +161,7 @@ bool Game::schaak(zw kleur) {
     return false;
 }
 
-// Geeft true als kleur schaakmat staat
+// Geeft `true` als kleur schaakmat staat
 bool Game::schaakmat(zw kleur) {
     // koning en locatie van koning in globale variabelen zetten
     SchaakStuk* koning;
@@ -145,8 +185,22 @@ bool Game::schaakmat(zw kleur) {
     return true;
 }
 
-// Kijkt na of de gegeven kleur schaak zou staan als stuk 's' verplaatst zou worden naar locatie 'r, k'
-// deze functie verandert de locatie van het stuk niet
+// Geeft `true` als kleur pat staat
+bool Game::pat(zw kleur) {
+    for (auto i : Game::getPieces(kleur)) {
+        vector<pair<int, int>> zetten = i->geldige_zetten(*this);
+        if (not zetten.empty()) {
+            for (auto j : zetten) {
+                if (not Game::quickCheckSchaak(kleur, i, j.first, j.second)) return false;
+            }
+        }
+    }
+    return true;
+}
+
+// Kijkt na of de gegeven kleur schaak zou staan als stuk 's' verplaatst zou worden naar locatie (r, k)
+// deze functie verandert de locatie van het stuk enkel tijdelijk.
+// Het schaakbord op het einde van de functie is altijd identiek aan het schaakbord bij het begin van de functie
 bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
     // plaats de huidige locatie van 's' in 'loc'
     pair<int, int> loc = s->getLocation(*this);
@@ -171,53 +225,8 @@ bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
     return true;
 }
 
-// Geeft true als kleur pat staat
-// (pat = geen geldige zet mogelijk, maar kleur staat niet schaak;
-// dit resulteert in een gelijkspel)
-bool Game::pat(zw kleur) {
-    for (auto i : Game::getPieces(kleur)) {
-        vector<pair<int, int>> zetten = i->geldige_zetten(*this);
-        if (not zetten.empty()) {
-            for (auto j : zetten) {
-                if (not Game::quickCheckSchaak(kleur, i, j.first, j.second)) return false;
-            }
-        }
-    }
-    return true;
-}
 
-// Geeft een pointer naar het schaakstuk dat op rij r, kolom k staat
-// Als er geen schaakstuk staat op deze positie, geef nullptr terug
-SchaakStuk* Game::getPiece(int r, int k) {
-    return schaakbord[r*8 + k];
-}
-
-// Zet het schaakstuk waar s naar verwijst neer op rij r, kolom k.
-// Als er al een schaakstuk staat, wordt het overschreven.
-// Bewaar in jouw datastructuur de *pointer* naar het schaakstuk,
-// niet het schaakstuk zelf.
-void Game::setPiece(int r, int k, SchaakStuk* s) {
-    schaakbord[r*8 + k] = s;
-}
-
-void Game::changeBeurt() {
-    if (aanBeurt == wit) aanBeurt = zwart;
-    else aanBeurt = wit;
-}
-
-void Game::setBeurt(zw kleur) {aanBeurt = kleur;}
-
-vector<SchaakStuk*> Game::getPieces(zw kleur) {
-    vector<SchaakStuk*> pieces;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            SchaakStuk* piece = Game::getPiece(i, j);
-            if (piece != nullptr && piece->getKleur() == kleur) pieces.push_back(piece);
-        }
-    }
-    return pieces;
-}
-
+// Geeft `true` terug als een stuk met kleur `kleur` geslagen zou kunnen worden op positie (r, k)
 bool Game::bedreigdVak(int r, int k, zw kleur) {
     SchaakStuk* temp = Game::getPiece(r, k);
     Pion* temp_piece = new Pion(kleur);
