@@ -22,6 +22,14 @@ class Game {
     map<int, log*> history;
     SchaakStuk* pionVoorEP;
 
+    bool schaak(zw kleur);
+    bool schaakmat(zw kleur);
+    bool pat(zw kleur);
+    bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
+
+    void logState();
+    bool madePassantMove(pair<int, int> move, SchaakStuk* s);
+
 public:
     Game();
     ~Game();
@@ -43,14 +51,8 @@ public:
     bool move(SchaakStuk* s,int r, int k);
     void changeBeurt();
 
-    bool schaak(zw kleur);
-    bool schaakmat(zw kleur);
-    bool pat(zw kleur);
-    bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
-
     bool bedreigdVak(int r, int k, zw kleur);
 
-    void logState();
     void goBack();
     void goForward();
     void deleteHistory();
