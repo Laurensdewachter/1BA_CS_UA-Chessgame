@@ -23,7 +23,7 @@ public:
     virtual Piece piece() const=0;
 
     virtual vector<pair<int, int>> geldige_zetten(Game &g) = 0;
-    virtual char* type() const = 0;
+    virtual const char* type() const = 0;   // https://www.geeksforgeeks.org/char-vs-stdstring-vs-char-c/
 };
 
 class Pion:public SchaakStuk {
@@ -34,7 +34,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 class Toren:public SchaakStuk {
@@ -45,7 +45,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 class Paard:public SchaakStuk {
@@ -56,7 +56,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 class Loper:public SchaakStuk {
@@ -67,7 +67,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 class Koning:public SchaakStuk {
@@ -78,7 +78,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 class Koningin:public SchaakStuk {
@@ -89,7 +89,7 @@ public:
     }
 
     vector<pair<int, int>> geldige_zetten(Game &g) override;
-    char* type() const;
+    const char* type() const;
 };
 
 #endif //SCHAKEN_SCHAAKSTUK_H

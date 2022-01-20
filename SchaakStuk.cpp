@@ -571,32 +571,32 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
 }
 
 
-char* Pion::type() const {
+const char* Pion::type() const {
     if (SchaakStuk::getKleur() == wit) return "Pw";
     return "Pb";
 }
 
-char* Toren::type() const {
+const char* Toren::type() const {
     if (SchaakStuk::getKleur() == wit) return "Rw";
     return "Rb";
 }
 
-char* Paard::type() const {
+const char* Paard::type() const {
     if (SchaakStuk::getKleur() == wit) return "Hw";
     return "Hb";
 }
 
-char* Loper::type() const {
+const char* Loper::type() const {
     if (SchaakStuk::getKleur() == wit) return "Bw";
     return "Bb";
 }
 
-char* Koning::type() const {
+const char* Koning::type() const {
     if (SchaakStuk::getKleur() == wit) return "Kw";
     return "Kb";
 }
 
-char* Koningin::type() const {
+const char* Koningin::type() const {
     if (SchaakStuk::getKleur() == wit) return "Qw";
     return "Qb";
 }
