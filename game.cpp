@@ -10,6 +10,7 @@ Game::~Game() {
 }
 
 void Game::setStartBord() {
+    aanBeurt = wit;
     schaakbord[0] = new Toren(zwart);
     schaakbord[1] = new Paard(zwart);
     schaakbord[2] = new Loper(zwart);

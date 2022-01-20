@@ -98,7 +98,14 @@ void SchaakGUI::clearTiles() {
 
 
 void SchaakGUI::newGame() {
-
+    if (QMessageBox::Yes == QMessageBox::question(this,
+                                                  tr("Nieuw spel"),
+                                                  tr("Bent u zeker dat u een nieuw spel wilt starten?\nNiet opgeslagen wijzigingen gaan verloren."))) {
+        g.deleteHistory();
+        g.clearBord();
+        g.setStartBord();
+        SchaakGUI::update();
+    }
 }
 
 void SchaakGUI::save() {
