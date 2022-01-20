@@ -72,6 +72,9 @@ void Game::setKoning(zw kleur, SchaakStuk* koning) {
     else koningZwart = koning;
 }
 
+// Geeft de pion die mogelijk en passant gezet zou kunnen worden
+SchaakStuk *Game::getPionVoorEP() {return pionVoorEP;}
+
 
 // Verwijdert alle stukken van het schaakbord
 void Game::clearBord() {
@@ -132,6 +135,12 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             logState();
             // throw een patError
             throw patError();
+        }
+        // https://stackoverflow.com/questions/1330550/c-compare-char-array-with-string
+        if ((strcmp(s->type(), "Pw") == 0 || strcmp(s->type(), "Pb") == 0) && not s->getMoved()) {
+            pionVoorEP = s;
+        } else {
+            pionVoorEP = nullptr;
         }
         s->setMoved(true);
         delete stuk_op_loc;

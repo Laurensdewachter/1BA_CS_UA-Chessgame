@@ -20,6 +20,7 @@ class Game {
     bool finished;
     int time;
     map<int, log*> history;
+    SchaakStuk* pionVoorEP;
 
 public:
     Game();
@@ -35,6 +36,7 @@ public:
     void setPiece(int r, int k, SchaakStuk* s);
     vector<SchaakStuk*> getPieces(zw kleur);
     void setKoning(zw kleur, SchaakStuk* koning);
+    SchaakStuk* getPionVoorEP();
 
     void clearBord();
 

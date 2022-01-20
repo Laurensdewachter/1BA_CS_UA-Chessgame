@@ -37,56 +37,42 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
     int k = loc.second;
-    pair<int, int> move;
     // onderscheid maken tussen zwart en wit
     if (SchaakStuk::getKleur() == wit) {
         // nakijken of de plaats voor de pion vrij is
-        if (g.getPiece(r-1, k) == nullptr) {
-            move.first = r - 1;
-            move.second = k;
-            zetten.push_back(move);
-        }
+        if (g.getPiece(r-1, k) == nullptr) zetten.emplace_back(r-1, k);
         // nakijken of er een stuk schuin links voor de pion staat
-        if (k > 0 && g.getPiece(r-1, k-1) != nullptr && g.getPiece(r-1, k-1)->getKleur() != SchaakStuk::getKleur()) {
-            move.first = r-1;
-            move.second = k-1;
-            zetten.push_back(move);
-        }
+        if (k > 0 && g.getPiece(r-1, k-1) != nullptr && g.getPiece(r-1, k-1)->getKleur() != SchaakStuk::getKleur())
+            zetten.emplace_back(r-1, k-1);
         // nakijken of er een stuk schuin rechts voor de pion staat
-        if (k < 7 && g.getPiece(r-1, k+1) != nullptr && g.getPiece(r-1, k+1)->getKleur() != SchaakStuk::getKleur()) {
-            move.first = r-1;
-            move.second = k+1;
-            zetten.push_back(move);
-        }
-        if (r == 6 && g.getPiece(r-1, k) == nullptr && g.getPiece(r-2, k) == nullptr) {
-            move.first = r-2;
-            move.second = k;
-            zetten.push_back(move);
-        }
+        if (k < 7 && g.getPiece(r-1, k+1) != nullptr && g.getPiece(r-1, k+1)->getKleur() != SchaakStuk::getKleur())
+            zetten.emplace_back(r-1, k+1);
+        // nakijken of het de eerste zet van de pion is en of de 2 vakken voor de pion vrij zijn
+        if (r == 6 && g.getPiece(r-1, k) == nullptr && g.getPiece(r-2, k) == nullptr) zetten.emplace_back(r-2, k);
+        // nakijken of er links een stuk dat en passant gepakt kan worden
+        if (k != 0 && r == 3 && g.getPiece(r, k-1) != nullptr && g.getPiece(r, k-1) == g.getPionVoorEP())
+            zetten.emplace_back(r-1, k-1);
+        // nakijken of er rechts een stuk dat en passant gepakt kan worden
+        if (k != 7 && r == 3 && g.getPiece(r, k+1) != nullptr && g.getPiece(r, k+1) == g.getPionVoorEP())
+            zetten.emplace_back(r-1, k+1);
     } else {
         // nakijken of de plaats voor de pion vrij is
-        if (g.getPiece(r+1, k) == nullptr) {
-            move.first = r+1;
-            move.second = k;
-            zetten.push_back(move);
-        }
+        if (g.getPiece(r+1, k) == nullptr) zetten.emplace_back(r+1, k);
         // nakijken of er een stuk schuin links voor de pion staat
-        if (k > 0 && g.getPiece(r+1, k-1) != nullptr && g.getPiece(r+1, k-1)->getKleur() != SchaakStuk::getKleur()) {
-            move.first = r+1;
-            move.second = k-1;
-            zetten.push_back(move);
-        }
+        if (k > 0 && g.getPiece(r+1, k-1) != nullptr && g.getPiece(r+1, k-1)->getKleur() != SchaakStuk::getKleur())
+            zetten.emplace_back(r+1, k-1);
         // nakijken of er een stuk schuin rechts voor de pion staat
-        if (k < 7 && g.getPiece(r+1, k+1) != nullptr && g.getPiece(r+1, k+1)->getKleur() != SchaakStuk::getKleur()) {
-            move.first = r+1;
-            move.second = k+1;
-            zetten.push_back(move);
-        }
-        if (r == 1 && g.getPiece(r+1, k) == nullptr && g.getPiece(r+2, k) == nullptr) {
-            move.first = r+2;
-            move.second = k;
-            zetten.push_back(move);
-        }
+        if (k < 7 && g.getPiece(r+1, k+1) != nullptr && g.getPiece(r+1, k+1)->getKleur() != SchaakStuk::getKleur())
+            zetten.emplace_back(r+1, k+1);
+        // nakijken of het de eerste zet van de pion is en of de 2 vakken voor de pion vrij zijn
+        if (r == 1 && g.getPiece(r+1, k) == nullptr && g.getPiece(r+2, k) == nullptr)
+            zetten.emplace_back(r+2, k);
+        // nakijken of er links een stuk dat en passant gepakt kan worden
+        if (k != 0 && r == 4 && g.getPiece(r, k-1) != nullptr && g.getPiece(r, k-1) == g.getPionVoorEP())
+            zetten.emplace_back(r+1, k-1);
+        // nakijken of er rechts een stuk dat en passant gepakt kan worden
+        if (k != 7 && r == 4 && g.getPiece(r, k+1) != nullptr && g.getPiece(r, k+1) == g.getPionVoorEP())
+            zetten.emplace_back(r+1, k+1);
     }
     return zetten;
 }
@@ -96,20 +82,12 @@ vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
     int k = loc.second;
-    pair<int, int> move;
     // stap naar onder op het bord
     if (r != 7) {
         for (int i = r+1; i <= 7; i++) {
-            if (g.getPiece(i, k) == nullptr) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
-            } else {
-                if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
-                    move.first = i;
-                    move.second = k;
-                    zetten.push_back(move);
-                }
+            if (g.getPiece(i, k) == nullptr) zetten.emplace_back(i, k);
+            else {
+                if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) zetten.emplace_back(i, k);
                 break;
             }
         }
@@ -117,17 +95,9 @@ vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
     // stap naar boven op het bord
     if (r != 0) {
         for (int i = r-1; i >= 0 ; i--) {
-            if (g.getPiece(i, k) == nullptr) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
-            } else {
-                if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
-                    pair<int, int> up;
-                    up.first = i;
-                    up.second = k;
-                    zetten.push_back(up);
-                }
+            if (g.getPiece(i, k) == nullptr) zetten.emplace_back(i, k);
+            else {
+                if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) zetten.emplace_back(i, k);
                 break;
             }
         }
@@ -135,16 +105,9 @@ vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
     // stap naar links
     if (k != 0) {
         for (int i = k-1; i >= 0; i--) {
-            if (g.getPiece(r, i) == nullptr) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
-            } else {
-                if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
-                    move.first = r;
-                    move.second = i;
-                    zetten.push_back(move);
-                }
+            if (g.getPiece(r, i) == nullptr) zetten.emplace_back(r, i);
+            else {
+                if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) zetten.emplace_back(r, i);
                 break;
             }
         }
@@ -152,16 +115,9 @@ vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
     // stap naar rechts;
     if (k != 7) {
         for (int i = k+1; i <= 7; i++) {
-            if (g.getPiece(r, i) == nullptr) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
-            } else {
-                if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
-                    move.first = r;
-                    move.second = i;
-                    zetten.push_back(move);
-                }
+            if (g.getPiece(r, i) == nullptr) zetten.emplace_back(r, i);
+            else {
+                if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) zetten.emplace_back(r, i);
                 break;
             }
         }
@@ -174,55 +130,30 @@ vector<pair<int, int>> Paard::geldige_zetten(Game &g) {
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
     int k = loc.second;
-    pair<int, int> move;
     // up-left
-    if (r > 1 && k > 0 && (g.getPiece(r-2, k-1) == nullptr || g.getPiece(r-2, k-1)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r-2;
-        move.second = k-1;
-        zetten.push_back(move);
-    }
+    if (r > 1 && k > 0 && (g.getPiece(r-2, k-1) == nullptr || g.getPiece(r-2, k-1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-2, k-1);
     // up-right
-    if (r > 1 && k < 7 && (g.getPiece(r-2, k+1) == nullptr || g.getPiece(r-2, k+1)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r-2;
-        move.second = k+1;
-        zetten.push_back(move);
-    }
+    if (r > 1 && k < 7 && (g.getPiece(r-2, k+1) == nullptr || g.getPiece(r-2, k+1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-2, k+1);
     // left-up
-    if (r > 0 && k > 1 && (g.getPiece(r-1, k-2) == nullptr || g.getPiece(r-1, k-2)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r-1;
-        move.second = k-2;
-        zetten.push_back(move);
-    }
+    if (r > 0 && k > 1 && (g.getPiece(r-1, k-2) == nullptr || g.getPiece(r-1, k-2)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-1, k-2);
     // right-up
-    if (r > 0 && k < 6 && (g.getPiece(r-1, k+2) == nullptr || g.getPiece(r-1, k+2)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r-1;
-        move.second = k+2;
-        zetten.push_back(move);
-    }
+    if (r > 0 && k < 6 && (g.getPiece(r-1, k+2) == nullptr || g.getPiece(r-1, k+2)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-1, k+2);
     // down-left
-    if (r < 6 && k > 0 && (g.getPiece(r+2, k-1) == nullptr || g.getPiece(r+2, k-1)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r+2;
-        move.second = k-1;
-        zetten.push_back(move);
-    }
+    if (r < 6 && k > 0 && (g.getPiece(r+2, k-1) == nullptr || g.getPiece(r+2, k-1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+2, k-1);
     // down-right
-    if (r < 6 && k < 7 && (g.getPiece(r+2, k+1) == nullptr || g.getPiece(r+2, k+1)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r+2;
-        move.second = k+1;
-        zetten.push_back(move);
-    }
+    if (r < 6 && k < 7 && (g.getPiece(r+2, k+1) == nullptr || g.getPiece(r+2, k+1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+2, k+1);
     // left-down
-    if (r < 7 && k > 1 && (g.getPiece(r+1, k-2) == nullptr || g.getPiece(r+1, k-2)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r+1;
-        move.second = k-2;
-        zetten.push_back(move);
-    }
+    if (r < 7 && k > 1 && (g.getPiece(r+1, k-2) == nullptr || g.getPiece(r+1, k-2)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+1, k-2);
     // right-down
-    if (r < 7 && k < 6 && (g.getPiece(r+1, k+2) == nullptr || g.getPiece(r+1, k+2)->getKleur() != SchaakStuk::getKleur())) {
-        move.first = r+1;
-        move.second = k+2;
-        zetten.push_back(move);
-    }
+    if (r < 7 && k < 6 && (g.getPiece(r+1, k+2) == nullptr || g.getPiece(r+1, k+2)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+1, k+2);
     return zetten;
 }
 
@@ -235,16 +166,9 @@ vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
     if (r != 0 || k != 0) {
         for (int i = 1; i <= 7; i++) {
             if (r-i < 0 || k-i < 0) break;
-            if (g.getPiece(r-i, k-i) == nullptr) {
-                pair<int, int> new_loc;
-                new_loc.first = r-i;
-                new_loc.second = k-i;
-                zetten.push_back(new_loc);
-            } else if (g.getPiece(r-i, k-i)->getKleur() != SchaakStuk::getKleur()) {
-                pair<int, int> new_loc;
-                new_loc.first = r-i;
-                new_loc.second = k-i;
-                zetten.push_back(new_loc);
+            if (g.getPiece(r-i, k-i) == nullptr) zetten.emplace_back(r-i, k-i);
+            else if (g.getPiece(r-i, k-i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r-i, k-i);
                 break;
             } else break;
         }
@@ -253,16 +177,9 @@ vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
     if (r != 0 || k != 7) {
         for (int i = 1; i <= 7; i++) {
             if (r-i < 0 || k+i > 7) break;
-            if (g.getPiece(r-i, k+i) == nullptr) {
-                pair<int, int> new_loc;
-                new_loc.first = r-i;
-                new_loc.second = k+i;
-                zetten.push_back(new_loc);
-            } else if (g.getPiece(r-i, k+i)->getKleur() != SchaakStuk::getKleur()) {
-                pair<int, int> new_loc;
-                new_loc.first = r-i;
-                new_loc.second = k+i;
-                zetten.push_back(new_loc);
+            if (g.getPiece(r-i, k+i) == nullptr) zetten.emplace_back(r-i, k+i);
+            else if (g.getPiece(r-i, k+i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r-i, k+i);
                 break;
             } else break;
         }
@@ -271,16 +188,9 @@ vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
     if (r != 7 || k != 0) {
         for (int i = 1; i <= 7; i++) {
             if (r+i > 7 || k-i < 0) break;
-            if (g.getPiece(r+i, k-i) == nullptr) {
-                pair<int, int> new_loc;
-                new_loc.first = r+i;
-                new_loc.second = k-i;
-                zetten.push_back(new_loc);
-            } else if (g.getPiece(r+i, k-i)->getKleur() != SchaakStuk::getKleur()) {
-                pair<int, int> new_loc;
-                new_loc.first = r+i;
-                new_loc.second = k-i;
-                zetten.push_back(new_loc);
+            if (g.getPiece(r+i, k-i) == nullptr) zetten.emplace_back(r+i, k-i);
+            else if (g.getPiece(r+i, k-i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r+i, k-i);
                 break;
             } else break;
         }
@@ -289,16 +199,9 @@ vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
     if (r != 0 || k != 0) {
         for (int i = 1; i <= 7; i++) {
             if (r+i > 7 || k+i > 7) break;
-            if (g.getPiece(r+i, k+i) == nullptr) {
-                pair<int, int> new_loc;
-                new_loc.first = r+i;
-                new_loc.second = k+i;
-                zetten.push_back(new_loc);
-            } else if (g.getPiece(r+i, k+i)->getKleur() != SchaakStuk::getKleur()) {
-                pair<int, int> new_loc;
-                new_loc.first = r+i;
-                new_loc.second = k+i;
-                zetten.push_back(new_loc);
+            if (g.getPiece(r+i, k+i) == nullptr) zetten.emplace_back(r+i, k+i);
+            else if (g.getPiece(r+i, k+i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r+i, k+i);
                 break;
             } else break;
         }
@@ -311,145 +214,30 @@ vector<pair<int, int>> Koning::geldige_zetten(Game &g) {
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
     int k = loc.second;
-    if (0 < r && r < 7 && 0 < k && k < 7) {
-        pair<int,int> new_loc;
-        new_loc.first = r+1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 0 && k == 0) {
-        pair<int,int> new_loc;
-        new_loc.first = 0;
-        new_loc.second = 1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 1;
-        new_loc.second = 1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 1;
-        new_loc.second = 0;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 0 && k == 7) {
-        pair<int,int> new_loc;
-        new_loc.first = 0;
-        new_loc.second = 6;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 1;
-        new_loc.second = 6;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 1;
-        new_loc.second = 7;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 7 && k == 0) {
-        pair<int,int> new_loc;
-        new_loc.first = 6;
-        new_loc.second = 0;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 6;
-        new_loc.second = 1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 7;
-        new_loc.second = 1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 7 && k == 7) {
-        pair<int,int> new_loc;
-        new_loc.first = 7;
-        new_loc.second = 6;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 6;
-        new_loc.second = 6;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = 6;
-        new_loc.second = 7                                                                                                                                        ;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r > 0 && r < 7 && k == 0) {
-        pair<int, int> new_loc;
-        new_loc.first = r-1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r > 0 && r < 7 && k == 7) {
-        pair<int, int> new_loc;
-        new_loc.first = r-1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 0 && k > 0 && k < 7) {
-        pair<int, int> new_loc;
-        new_loc.first = r;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r+1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    } else if (r == 7 && k > 0 && k < 7) {
-        pair<int, int> new_loc;
-        new_loc.first = r;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k-1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r-1;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-        new_loc.first = r;
-        new_loc.second = k+1;
-        if (g.getPiece(new_loc.first, new_loc.second) == nullptr || g.getPiece(new_loc.first, new_loc.second)->getKleur() != SchaakStuk::getKleur()) zetten.push_back(new_loc);
-    }
+    // onder
+    if (r != 7 && (g.getPiece(r+1, k) == nullptr || g.getPiece(r+1, k)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+1, k);
+    // links onder
+    if (r != 7 && k != 0 && (g.getPiece(r+1, k-1) == nullptr || g.getPiece(r+1, k-1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+1, k-1);
+    // links
+    if (k != 0 && (g.getPiece(r, k-1) == nullptr || g.getPiece(r, k-1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r, k-1);
+    // links boven
+    if (r != 0 && k != 0 && (g.getPiece(r-1, k-1) == nullptr || g.getPiece(r-1, k-1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-1, k-1);
+    // boven
+    if (r != 0 && (g.getPiece(r-1, k) == nullptr || g.getPiece(r-1, k)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-1, k);
+    // rechts boven
+    if (r != 0 && k != 7 && (g.getPiece(r-1, k+1) == nullptr || g.getPiece(r-1, k+1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r-1, k+1);
+    // rechts
+    if (k != 7 && (g.getPiece(r, k+1) == nullptr || g.getPiece(r, k+1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r, k+1);
+    // rechts onder
+    if (r != 7 && k != 7 && (g.getPiece(r+1, k+1) == nullptr || g.getPiece(r+1, k+1)->getKleur() != SchaakStuk::getKleur()))
+        zetten.emplace_back(r+1, k+1);
     return zetten;
 }
 
@@ -458,18 +246,12 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
     int k = loc.second;
-    pair<int, int> move;
     // up
     if (r != 0) {
         for (int i = r-1; i >= 0; i--) {
-            if (g.getPiece(i, k) == nullptr) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
-            } else if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
+            if (g.getPiece(i, k) == nullptr) zetten.emplace_back(i, k);
+            else if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(i, k);
                 break;
             } else break;
         }
@@ -477,14 +259,9 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // down
     if (r != 7) {
         for (int i = r+1; i < 8; i++) {
-            if (g.getPiece(i, k) == nullptr) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
-            } else if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
-                move.first = i;
-                move.second = k;
-                zetten.push_back(move);
+            if (g.getPiece(i, k) == nullptr) zetten.emplace_back(i, k);
+            else if (g.getPiece(i, k)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(i, k);
                 break;
             } else break;
         }
@@ -492,14 +269,9 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // left
     if (k != 0) {
         for (int i = k-1; i >= 0; i--) {
-            if (g.getPiece(r, i) == nullptr) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
-            } else if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
+            if (g.getPiece(r, i) == nullptr) zetten.emplace_back(r, i);
+            else if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r, i);
                 break;
             } else break;
         }
@@ -507,14 +279,9 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // right
     if (k != 7) {
         for (int i = k+1; i < 8; i++) {
-            if (g.getPiece(r, i) == nullptr) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
-            } else if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
-                move.first = r;
-                move.second = i;
-                zetten.push_back(move);
+            if (g.getPiece(r, i) == nullptr) zetten.emplace_back(r, i);
+            else if (g.getPiece(r, i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r, i);
                 break;
             } else break;
         }
@@ -522,12 +289,10 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // left-up
     if (r != 0 && k != 0) {
         for (int i = 1; i < 7; i++) {
-            move.first = r - i;
-            move.second = k - i;
-            if (move.first < 0 || move.second < 0) break;
-            if (g.getPiece(move.first, move.second) == nullptr) zetten.push_back(move);
-            else if (g.getPiece(move.first, move.second)->getKleur() != SchaakStuk::getKleur()) {
-                zetten.push_back(move);
+            if (r-i < 0 || k-i < 0) break;
+            if (g.getPiece(r-i, k-i) == nullptr) zetten.emplace_back(r-i, k-i);
+            else if (g.getPiece(r-i, k-i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r-i, k-i);
                 break;
             } else break;
         }
@@ -535,12 +300,10 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // right-up
     if (r != 0 && k != 7) {
         for (int i = 1; i < 7; i++) {
-            move.first = r - i;
-            move.second = k + i;
-            if (move.first < 0 || move.second > 7) break;
-            if (g.getPiece(move.first, move.second) == nullptr) zetten.push_back(move);
-            else if (g.getPiece(move.first, move.second)->getKleur() != SchaakStuk::getKleur()) {
-                zetten.push_back(move);
+            if (r-i < 0 || k+i > 7) break;
+            if (g.getPiece(r-i, k+i) == nullptr) zetten.emplace_back(r-i, k+i);
+            else if (g.getPiece(r-i, k+i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r-i, k+i);
                 break;
             } else break;
         }
@@ -548,12 +311,10 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // left-down
     if (r != 7 && k != 0) {
         for (int i = 1; i < 7; i++) {
-            move.first = r + i;
-            move.second = k - i;
-            if (move.first > 7 || move.second < 0) break;
-            if (g.getPiece(move.first, move.second) == nullptr) zetten.push_back(move);
-            else if (g.getPiece(move.first, move.second)->getKleur() != SchaakStuk::getKleur()) {
-                zetten.push_back(move);
+            if (r+i > 7 || k-i < 0) break;
+            if (g.getPiece(r+i, k-i) == nullptr) zetten.emplace_back(r+i, k-i);
+            else if (g.getPiece(r+i, k-i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r+i, k-i);
                 break;
             } else break;
         }
@@ -561,12 +322,10 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     // right-down
     if (r != 7 && k != 7) {
         for (int i = 1; i < 7; i++) {
-            move.first = r + i;
-            move.second = k + i;
-            if (move.first > 7 || move.second > 7) break;
-            if (g.getPiece(move.first, move.second) == nullptr) zetten.push_back(move);
-            else if (g.getPiece(move.first, move.second)->getKleur() != SchaakStuk::getKleur()) {
-                zetten.push_back(move);
+            if (r+i > 7 || k+i > 7) break;
+            if (g.getPiece(r+i, k+i) == nullptr) zetten.emplace_back(r+i, k+i);
+            else if (g.getPiece(r+i, k+i)->getKleur() != SchaakStuk::getKleur()) {
+                zetten.emplace_back(r+i, k+i);
                 break;
             } else break;
         }
