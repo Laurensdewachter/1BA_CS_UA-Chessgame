@@ -9,13 +9,17 @@
 #include "SchaakStuk.h"
 using namespace std;
 
+struct log;
+
 class Game {
 // variabelen om de status van het spel/bord te bewaren
     map<int, SchaakStuk*> schaakbord;
-    zw aanBeurt;
     SchaakStuk* koningWit;
     SchaakStuk* koningZwart;
+    zw aanBeurt;
     bool finished;
+    int time;
+    map<int, log*> history;
 
 public:
     Game();
@@ -43,6 +47,20 @@ public:
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
 
     bool bedreigdVak(int r, int k, zw kleur);
+
+    void logState();
+    void goBack();
+    void goForward();
+    void deleteHistory();
+};
+
+struct log {
+    map<int, SchaakStuk*> schaakbord;
+    zw aanBeurt;
+    int time;
+
+    log(map<int, SchaakStuk*> s, zw b, int t) : schaakbord(s), aanBeurt(b), time(t) {}
+    ~log() = default;
 };
 
 class schaakError : public exception {
@@ -67,5 +85,9 @@ public:
     verplaatsingsError() {}
 };
 
+class undoRedoError : public exception {
+public:
+    undoRedoError() {}
+};
 
 #endif //SCHAKEN_GAME_H

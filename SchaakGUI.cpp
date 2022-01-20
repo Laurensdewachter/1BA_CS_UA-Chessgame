@@ -45,22 +45,19 @@ void SchaakGUI::clicked(int r, int k) {
                 return;
             } catch (schaakMatError& e) {
                 SchaakGUI::update();
+                SchaakGUI::clearTiles();
                 if (e.getWinner() == wit) {
-                    SchaakGUI::clearTiles();
                     message("Schaakmat! Wit heeft gewonnen");
                 }
                 else {
-                    SchaakGUI::clearTiles();
                     message("Schaakmat! Zwart heeft gewonnen");
                 }
-                g.setFinished(true);
                 return;
             } catch (verplaatsingsError& e) {return;}
             catch (patError& e) {
                 SchaakGUI::update();
                 SchaakGUI::clearTiles();
                 message("Gelijkspel!");
-                g.setFinished(true);
             }
             g.changeBeurt();
         }
@@ -176,15 +173,28 @@ void SchaakGUI::open() {
     }
     update();
     g.setFinished(false);
+    g.deleteHistory();
     if (g.getBeurt() == wit) message("Wit is aan beurt");
     else message("Zwart is aan beurt");
 }
 
 void SchaakGUI::undo() {
-    message("Je hebt undo gekozen");
+    try {
+        g.goBack();
+    } catch (undoRedoError& e) {return;}
+    firstClick = true;
+    SchaakGUI::update();
+    SchaakGUI::clearTiles();
 }
 
-void SchaakGUI::redo() {}
+void SchaakGUI::redo() {
+    try {
+        g.goForward();
+    } catch (undoRedoError& e) {return;}
+    firstClick = true;
+    SchaakGUI::update();
+    SchaakGUI::clearTiles();
+}
 
 void SchaakGUI::visualizationChange() {
     /*

@@ -3,7 +3,7 @@
 
 #include "game.h"
 
-Game::Game() : aanBeurt(wit), finished(false) {}
+Game::Game() : aanBeurt(wit), finished(false), time(0) {}
 
 Game::~Game() {
     Game::clearBord();
@@ -30,6 +30,7 @@ void Game::setStartBord() {
     schaakbord[61] = new Loper(wit);
     schaakbord[62] = new Paard(wit);
     schaakbord[63] = new Toren(wit);
+    logState();
 }
 
 zw Game::getBeurt() const {return aanBeurt;}
@@ -110,6 +111,8 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             // nakijken of de speler zijn tegenstander schaakmat heeft gezet
             if (Game::schaakmat(kleur_inv)) {
                 delete stuk_op_loc;
+                finished = true;
+                logState();
                 // throw een schaakMatError
                 throw schaakMatError(kleur);
             }
@@ -122,10 +125,13 @@ bool Game::move(SchaakStuk* s, int r, int k) {
         // nakijken of de speler zijn tegenstander pat heeft gezet
         if (Game::pat(kleur_inv)) {
             delete stuk_op_loc;
+            finished = true;
+            logState();
             // throw een patError
             throw patError();
         }
         delete stuk_op_loc;
+        logState();
         return true;
     }
     throw verplaatsingsError();
@@ -248,4 +254,43 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     Game::setPiece(r, k, temp);
     delete temp_piece;
     return false;
+}
+
+
+void Game::logState() {
+    time += 1;
+
+    int counter = time + 1;
+    while (history[counter] != nullptr) {
+        history[counter] = nullptr;
+        counter += 1;
+    }
+
+    log* log = new struct log(schaakbord, aanBeurt, time);
+    history[time] = log;
+}
+
+void Game::goBack() {
+    if (time-1 < 1 || finished) throw undoRedoError();
+    schaakbord = history[time-1]->schaakbord;
+    if (history[time-1]->aanBeurt == wit) aanBeurt = zwart;
+    else aanBeurt = wit;
+    time = history[time-1]->time;
+}
+
+void Game::goForward() {
+    if (history[time+1] == nullptr || finished) throw undoRedoError();
+    schaakbord = history[time+1]->schaakbord;
+    if (history[time+1]->aanBeurt == wit) aanBeurt = zwart;
+    else aanBeurt = wit;
+    time = history[time+1]->time;
+}
+
+void Game::deleteHistory() {
+    int counter = 1;
+    while (history[counter] != nullptr) {
+        history[counter] = nullptr;
+        counter += 1;
+    }
+    time = 0;
 }
