@@ -5,6 +5,7 @@
 #include "SchaakGUI.h"
 
 Game::Game() : aanBeurt(wit), finished(false), time(0) {
+    Game::setStartBord();
     promotieWitBord[34] = new Toren(wit);
     promotieWitBord[35] = new Paard(wit);
     promotieWitBord[36] = new Loper(wit);
@@ -388,8 +389,9 @@ void Game::goBack() {
         else if (strcmp(history[time-1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
         if (strcmp(history[time-1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time-1]->eersteZetten[i]);
     }
-    aanBeurt = history[time-1]->aanBeurt;
-    time = history[time-1]->time;
+    if (aanBeurt == wit) aanBeurt = zwart;
+    else aanBeurt = wit;
+    time -= 1;
 }
 
 void Game::goForward() {
@@ -418,9 +420,9 @@ void Game::goForward() {
         if (strcmp(history[time+1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time+1]->eersteZetten[i]);
     }
     if (time == 0) aanBeurt = wit;
-    else if (history[time+1]->aanBeurt == wit) aanBeurt = zwart;
+    if (aanBeurt == wit) aanBeurt = zwart;
     else aanBeurt = wit;
-    time = history[time+1]->time;
+    time += 1;
 }
 
 void Game::deleteHistory() {
@@ -432,7 +434,7 @@ void Game::deleteHistory() {
     time = 0;
 }
 
-Log::Log(map<int, SchaakStuk*> &s, zw b, int t) : aanBeurt(b), time(t) {
+Log::Log(map<int, SchaakStuk*> &s, zw b, int t) {
     for (int i = 0; i < 64; i++) {
         if (s[i] != nullptr) {
             schaakbord[i] = s[i]->type();

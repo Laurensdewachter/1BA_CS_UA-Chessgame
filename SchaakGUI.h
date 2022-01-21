@@ -14,8 +14,6 @@
 class SchaakGUI:public ChessWindow {
 public:
     SchaakGUI();
-    void update();
-    void setPromotie(bool p);
 
 private:
     Game g;
@@ -28,6 +26,7 @@ private:
     bool promotie;
     zw promotieKleur;
 
+    void update();
     void clicked(int x, int y) override;
     void visualize(int r, int k, SchaakStuk* s);
 
@@ -37,7 +36,7 @@ private:
     void undo() override;
     void redo() override;
     void visualizationChange() override;
-/*  Overgeerfde functies van ChessWindow:
+/*  Overgeërfde functies van ChessWindow:
 
     void removeAllMarking();
     void clearBoard();

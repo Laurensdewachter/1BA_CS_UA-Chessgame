@@ -68,8 +68,6 @@ public:
 struct Log {
     map<int, const char*> schaakbord;
     map<int, bool> eersteZetten;
-    zw aanBeurt;
-    int time;
 
     Log(map<int, SchaakStuk*> &s, zw b, int t);
     ~Log() = default;

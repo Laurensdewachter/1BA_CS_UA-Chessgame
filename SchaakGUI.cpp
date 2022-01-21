@@ -5,11 +5,12 @@
 #include "guicode/message.h"
 #include "guicode/fileIO.h"
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
 // Constructor
-SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true), promotie(false) {
-    g.setStartBord();
-    SchaakGUI::update();
-}
+SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true), promotie(false) {SchaakGUI::update();}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 // Update de inhoud van de grafische weergave van het schaakbord (scene)
 // en maak het consistent met de game state in variabele g.
@@ -21,9 +22,6 @@ void SchaakGUI::update() {
         }
     }
 }
-
-void SchaakGUI::setPromotie(bool p) {promotie = p;}
-
 
 // Deze functie wordt opgeroepen telkens er op het schaakbord
 // geklikt wordt. x,y geeft de positie aan waar er geklikt
@@ -50,6 +48,11 @@ void SchaakGUI::clicked(int r, int k) {
     } else {
         pair<int, int> temp = {r, k};
         if (temp != selectedPiece->getLocation(g)) {
+            if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
+                selectedPiece = g.getPiece(r, k);
+                SchaakGUI::visualize(r, k, selectedPiece);
+                return;
+            }
             try {
                 g.move(selectedPiece, r, k);
             } catch (schaakError& e) {
@@ -65,7 +68,11 @@ void SchaakGUI::clicked(int r, int k) {
                     message("Schaakmat! Zwart heeft gewonnen");
                 }
                 return;
-            } catch (verplaatsingsError& e) {return;}
+            } catch (verplaatsingsError& e) {
+                SchaakGUI::removeAllMarking();
+                firstClick = true;
+                return;
+            }
             catch (patError& e) {
                 SchaakGUI::update();
                 SchaakGUI::removeAllMarking();
@@ -88,6 +95,7 @@ void SchaakGUI::clicked(int r, int k) {
 
 // Kleurt de juiste vakken en stukken op het bord
 void SchaakGUI::visualize(int r, int k, SchaakStuk* s) {
+    SchaakGUI::removeAllMarking();
     selectedTile = {r, k};
     SchaakGUI::setTileSelect(r, k, true);
     for (auto i : selectedPiece->geldige_zetten(g)) {
@@ -105,6 +113,7 @@ void SchaakGUI::visualize(int r, int k, SchaakStuk* s) {
     }
 }
 
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 void SchaakGUI::newGame() {
     if (QMessageBox::Yes == QMessageBox::question(this,
@@ -216,8 +225,6 @@ void SchaakGUI::redo() {
 }
 
 void SchaakGUI::visualizationChange() {
-    if (not firstClick) {
-        SchaakGUI::removeAllMarking();
-        SchaakGUI::visualize(selectedTile.first, selectedTile.second, selectedPiece);
-    }
+    SchaakGUI::visualize(selectedTile.first, selectedTile.second, selectedPiece);
+
 }
