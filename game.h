@@ -9,7 +9,7 @@
 #include "SchaakStuk.h"
 using namespace std;
 
-struct log;
+struct Log;
 
 class Game {
 // variabelen om de status van het spel/bord te bewaren
@@ -19,7 +19,7 @@ class Game {
     zw aanBeurt;
     bool finished;
     int time;
-    map<int, log*> history;
+    map<int, Log*> history;
     SchaakStuk* pionVoorEP;
 
     SchaakStuk* getKoning(zw kleur) const;
@@ -59,13 +59,14 @@ public:
     void deleteHistory();
 };
 
-struct log {
-    map<int, SchaakStuk*> schaakbord;
+struct Log {
+    map<int, const char*> schaakbord;
+    map<int, bool> eersteZetten;
     zw aanBeurt;
     int time;
 
-    log(map<int, SchaakStuk*> s, zw b, int t) : schaakbord(s), aanBeurt(b), time(t) {}
-    ~log() = default;
+    Log(map<int, SchaakStuk*> &s, zw b, int t);
+    ~Log() = default;
 };
 
 class schaakError : public exception {

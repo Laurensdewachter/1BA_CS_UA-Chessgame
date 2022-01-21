@@ -318,22 +318,65 @@ void Game::logState() {
         counter += 1;
     }
 
-    log* log = new struct log(schaakbord, aanBeurt, time);
-    history[time] = log;
+    history[time] = new struct Log(schaakbord, aanBeurt, time);
 }
 
 void Game::goBack() {
     if (time-1 < 1 || finished) throw undoRedoError();
-    schaakbord = history[time-1]->schaakbord;
-    if (history[time-1]->aanBeurt == wit) aanBeurt = zwart;
-    else aanBeurt = wit;
+    clearBord();
+    for (int i = 0; i < 64; i++) {
+        if (strcmp(history[time-1]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
+        if (strcmp(history[time-1]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
+        else if (strcmp(history[time-1]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
+        else if (strcmp(history[time-1]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
+        else if (strcmp(history[time-1]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
+        else if (strcmp(history[time-1]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
+        else if (strcmp(history[time-1]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
+        else if (strcmp(history[time-1]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
+        else if (strcmp(history[time-1]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
+        else if (strcmp(history[time-1]->schaakbord[i], "Kw") == 0) {
+            schaakbord[i] = new Koning(wit);
+            koningWit = schaakbord[i];
+        }
+        else if (strcmp(history[time-1]->schaakbord[i], "Kb") == 0) {
+            schaakbord[i] = new Koning(zwart);
+            koningZwart = schaakbord[i];
+        }
+        else if (strcmp(history[time-1]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
+        else if (strcmp(history[time-1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
+        if (strcmp(history[time-1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time-1]->eersteZetten[i]);
+    }
+    aanBeurt = history[time-1]->aanBeurt;
     time = history[time-1]->time;
 }
 
 void Game::goForward() {
     if (history[time+1] == nullptr || finished) throw undoRedoError();
-    schaakbord = history[time+1]->schaakbord;
-    if (history[time+1]->aanBeurt == wit) aanBeurt = zwart;
+    clearBord();
+    for (int i = 0; i < 64; i++) {
+        if (strcmp(history[time+1]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
+        else if (strcmp(history[time+1]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
+        else if (strcmp(history[time+1]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
+        else if (strcmp(history[time+1]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
+        else if (strcmp(history[time+1]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
+        else if (strcmp(history[time+1]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
+        else if (strcmp(history[time+1]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
+        else if (strcmp(history[time+1]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
+        else if (strcmp(history[time+1]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
+        else if (strcmp(history[time+1]->schaakbord[i], "Kw") == 0) {
+            schaakbord[i] = new Koning(wit);
+            koningWit = schaakbord[i];
+        }
+        else if (strcmp(history[time+1]->schaakbord[i], "Kb") == 0) {
+            schaakbord[i] = new Koning(zwart);
+            koningZwart = schaakbord[i];
+        }
+        else if (strcmp(history[time+1]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
+        else if (strcmp(history[time+1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
+        if (strcmp(history[time+1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time-1]->eersteZetten[i]);
+    }
+    if (time == 0) aanBeurt = wit;
+    else if (history[time+1]->aanBeurt == wit) aanBeurt = zwart;
     else aanBeurt = wit;
     time = history[time+1]->time;
 }
@@ -345,4 +388,17 @@ void Game::deleteHistory() {
         counter += 1;
     }
     time = 0;
+}
+
+Log::Log(map<int, SchaakStuk*> &s, zw b, int t) : aanBeurt(b), time(t) {
+    for (int i = 0; i < 64; i++) {
+        if (s[i] != nullptr) {
+            schaakbord[i] = s[i]->type();
+            eersteZetten[i] = s[i]->getMoved();
+        }
+        else {
+            schaakbord[i] = ".";
+            eersteZetten[i] = false;
+        }
+    }
 }
