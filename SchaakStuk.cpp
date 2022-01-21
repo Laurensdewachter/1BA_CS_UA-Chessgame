@@ -32,7 +32,7 @@ bool SchaakStuk::getMoved() const {return hasMoved;}
 void SchaakStuk::setMoved(bool m) {hasMoved = m;}
 
 
-vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
+vector<pair<int, int>> Pion::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -77,7 +77,7 @@ vector<pair<int, int>> Pion::geldige_zetten(Game &g) {
     return zetten;
 }
 
-vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
+vector <pair<int, int>> Toren::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -125,7 +125,7 @@ vector <pair<int, int>> Toren::geldige_zetten(Game &g) {
     return zetten;
 }
 
-vector<pair<int, int>> Paard::geldige_zetten(Game &g) {
+vector<pair<int, int>> Paard::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -157,7 +157,7 @@ vector<pair<int, int>> Paard::geldige_zetten(Game &g) {
     return zetten;
 }
 
-vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
+vector<pair<int, int>> Loper::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -209,7 +209,7 @@ vector<pair<int, int>> Loper::geldige_zetten(Game &g) {
     return zetten;
 }
 
-vector<pair<int, int>> Koning::geldige_zetten(Game &g) {
+vector<pair<int, int>> Koning::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -238,10 +238,31 @@ vector<pair<int, int>> Koning::geldige_zetten(Game &g) {
     // rechts onder
     if (r != 7 && k != 7 && (g.getPiece(r+1, k+1) == nullptr || g.getPiece(r+1, k+1)->getKleur() != SchaakStuk::getKleur()))
         zetten.emplace_back(r+1, k+1);
+
+    // grote rokade
+    // nakijken of de koning en toren nog niet bewogen hebben en of er geen stukken in de weg staan
+    if (not intern && not SchaakStuk::getMoved() && g.getPiece(r, 0) != nullptr && not g.getPiece(r, 0)->getMoved()
+    && g.getPiece(r, k-1) == nullptr && g.getPiece(r, k-2) == nullptr && g.getPiece(r, k-3) == nullptr) {
+        // nakijken of de 2 vakken links van de koning worden bedreigd
+        if (not (g.bedreigdVak(r, k, SchaakStuk::getKleur()) || g.bedreigdVak(r, k-1, SchaakStuk::getKleur())
+        || g.bedreigdVak(r, k-2, SchaakStuk::getKleur()))) {
+            zetten.emplace_back(r, k-2);
+        }
+    }
+    // kleine rokade
+    // nakijken of de koning en toren nog niet bewogen hebben en of er geen stukken in de weg staan
+    if (not intern && not SchaakStuk::getMoved() && g.getPiece(r, 7) != nullptr && not g.getPiece(r, 7)->getMoved()
+    && g.getPiece(r, k+1) == nullptr && g.getPiece(r, k+2) == nullptr) {
+        // nakijken of de 2 vakken rechts van de koning worden bedreigd
+        if (not (g.bedreigdVak(r, k, SchaakStuk::getKleur()) || g.bedreigdVak(r, k+1, SchaakStuk::getKleur())
+        || g.bedreigdVak(r, k+2, SchaakStuk::getKleur()))) {
+            zetten.emplace_back(r, k+2);
+        }
+    }
     return zetten;
 }
 
-vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
+vector<pair<int, int>> Koningin::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
     int r = loc.first;
@@ -332,7 +353,6 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g) {
     }
     return zetten;
 }
-
 
 const char* Pion::type() const {
     if (SchaakStuk::getKleur() == wit) return "Pw";

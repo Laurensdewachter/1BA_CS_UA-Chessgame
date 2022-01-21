@@ -9,164 +9,12 @@ Game::~Game() {
     Game::clearBord();
 }
 
-void Game::setStartBord() {
-    aanBeurt = wit;
-    schaakbord[0] = new Toren(zwart);
-    schaakbord[1] = new Paard(zwart);
-    schaakbord[2] = new Loper(zwart);
-    schaakbord[3] = new Koningin(zwart);
-    koningZwart = new Koning(zwart);
-    schaakbord[4] = koningZwart;
-    schaakbord[5] = new Loper(zwart);
-    schaakbord[6] = new Paard(zwart);
-    schaakbord[7] = new Toren(zwart);
-    for (int i = 8; i < 16; i++) schaakbord[i] = new Pion(zwart);
-    for (int i = 48; i < 56; i++) schaakbord[i] = new Pion(wit);
-    schaakbord[56] = new Toren(wit);
-    schaakbord[57] = new Paard(wit);
-    schaakbord[58] = new Loper(wit);
-    schaakbord[59] = new Koningin(wit);
-    koningWit = new Koning(wit);
-    schaakbord[60] = koningWit;
-    schaakbord[61] = new Loper(wit);
-    schaakbord[62] = new Paard(wit);
-    schaakbord[63] = new Toren(wit);
-    logState();
+
+SchaakStuk *Game::getKoning(zw kleur) const {
+    if (kleur == wit) return koningWit;
+    return koningZwart;
 }
 
-zw Game::getBeurt() const {return aanBeurt;}
-
-void Game::setBeurt(zw kleur) {aanBeurt = kleur;}
-
-bool Game::getFinished() const {return finished;}
-
-void Game::setFinished(bool f) {finished = f;}
-
-// Geeft een pointer naar het schaakstuk dat op rij r, kolom k staat
-// Als er geen schaakstuk staat op deze positie, geef nullptr terug
-SchaakStuk* Game::getPiece(int r, int k) {return schaakbord[r*8 + k];}
-
-// Zet het schaakstuk waar s naar verwijst neer op rij r, kolom k.
-// Als er al een schaakstuk staat, wordt het overschreven.
-// Bewaar in jouw datastructuur de *pointer* naar het schaakstuk,
-// niet het schaakstuk zelf.
-void Game::setPiece(int r, int k, SchaakStuk* s) {
-    schaakbord[r*8 + k] = s;
-}
-
-// Geeft alle stukken van `kleur` die nog op het bord staan
-vector<SchaakStuk*> Game::getPieces(zw kleur) {
-    vector<SchaakStuk*> pieces;
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 8; j++) {
-            SchaakStuk* piece = Game::getPiece(i, j);
-            if (piece != nullptr && piece->getKleur() == kleur) pieces.push_back(piece);
-        }
-    }
-    return pieces;
-}
-
-// Zet `koning` als de variabele `koningWit` of `koningZwart`
-void Game::setKoning(zw kleur, SchaakStuk* koning) {
-    if (kleur == wit) koningWit = koning;
-    else koningZwart = koning;
-}
-
-// Geeft de pion die mogelijk en passant gezet zou kunnen worden
-SchaakStuk *Game::getPionVoorEP() {return pionVoorEP;}
-
-
-// Verwijdert alle stukken van het schaakbord
-void Game::clearBord() {
-    for (int i = 0; i < 64; i++) {
-        delete schaakbord[i];
-        schaakbord[i] = nullptr;
-    }
-    koningWit = koningZwart = nullptr;
-}
-
-
-// Verplaats stuk s naar positie (r, k)
-// Als deze move niet mogelijk is, wordt de juiste soort error teruggegeven
-// en verandert er niets aan het schaakbord (uitgezonderd bij schaakmat. Dan wordt de zet wel gemaakt).
-// Anders wordt de move uitgevoerd en wordt true teruggegeven
-bool Game::move(SchaakStuk* s, int r, int k) {
-    // huidige locatie van het stuk bewaren
-    pair<int, int> loc = s->getLocation(*this);
-    // mogelijke zetten van het stuk verzamelen
-    vector<pair<int, int>> mogelijke_zetten = s->geldige_zetten(*this);
-    // aangeklikte locatie in een pair<int, int> zetten
-    pair<int, int> vergelijker = {r, k};
-
-    // controleren of de aangeklikte locatie een geldige zet is
-    if (any_of(mogelijke_zetten.begin(), mogelijke_zetten.end(), [vergelijker](pair<int, int> i){return i == vergelijker;})) {
-        // het stuk dat eventueel gepakt zou worden opslaan als stuk_op_loc
-        SchaakStuk *stuk_op_loc = Game::getPiece(r, k);
-        // de huidige locatie leeg maken
-        Game::setPiece(loc.first, loc.second, nullptr);
-        // het stuk verplaatsen naar de nieuwe locatie
-        Game::setPiece(r, k, s);
-
-        zw kleur = s->getKleur();
-        zw kleur_inv = wit;
-        if (kleur == wit) kleur_inv = zwart;
-        // nakijken of de speler die juist (probeerde) te zetten zichzelf niet schaak heeft gezet/laten staan
-        if (Game::schaak(kleur)) {
-            // nakijken of de speler zijn tegenstander schaakmat heeft gezet
-            if (Game::schaakmat(kleur_inv)) {
-                s->setMoved(true);
-                delete stuk_op_loc;
-                finished = true;
-                logState();
-                // throw een schaakMatError
-                throw schaakMatError(kleur);
-            }
-            // als de speler schaak staat moet de zet ongedaan gemaakt worden
-            Game::setPiece(loc.first, loc.second, s);
-            Game::setPiece(r, k, stuk_op_loc);
-            // throw een schaakError
-            throw schaakError();
-        }
-        // nakijken of de speler zijn tegenstander pat heeft gezet
-        if (Game::pat(kleur_inv)) {
-            s->setMoved(true);
-            delete stuk_op_loc;
-            finished = true;
-            logState();
-            // throw een patError
-            throw patError();
-        }
-
-        // en passant
-        // bijhouden of een pion voor de eerste keer verplaatst is
-        // https://stackoverflow.com/questions/1330550/c-compare-char-array-with-string
-        if ((strcmp(s->type(), "Pw") == 0 || strcmp(s->type(), "Pb") == 0) && not s->getMoved()) {
-            pionVoorEP = s;
-        } else if (stuk_op_loc == nullptr && madePassantMove({r, k}, s)) {
-            if (s->getKleur() == wit) {
-                stuk_op_loc = Game::getPiece(r+1, k);
-                Game::setPiece(r+1, k, nullptr);
-            }
-            else {
-                stuk_op_loc = Game::getPiece(r-1, k);
-                Game::setPiece(r-1, k, nullptr);
-            }
-            pionVoorEP = nullptr;
-        } else pionVoorEP = nullptr;
-
-        s->setMoved(true);
-        delete stuk_op_loc;
-        logState();
-        return true;
-    }
-    throw verplaatsingsError();
-}
-
-// Verander `aanBeurt` van kleur
-void Game::changeBeurt() {
-    if (aanBeurt == wit) aanBeurt = zwart;
-    else aanBeurt = wit;
-}
 
 // Geeft `true` als kleur schaak staat
 bool Game::schaak(zw kleur) {
@@ -257,6 +105,187 @@ bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
 }
 
 
+bool Game::madePassantMove(pair<int, int> move, SchaakStuk *s) {
+    if (s->getKleur() == wit && Game::getPiece(move.first+1, move.second) == pionVoorEP) return true;
+    if (s->getKleur() == zwart && Game::getPiece(move.first-1, move.second) == pionVoorEP) return true;
+    return false;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+void Game::setStartBord() {
+    aanBeurt = wit;
+    schaakbord[0] = new Toren(zwart);
+    schaakbord[1] = new Paard(zwart);
+    schaakbord[2] = new Loper(zwart);
+    schaakbord[3] = new Koningin(zwart);
+    koningZwart = new Koning(zwart);
+    schaakbord[4] = koningZwart;
+    schaakbord[5] = new Loper(zwart);
+    schaakbord[6] = new Paard(zwart);
+    schaakbord[7] = new Toren(zwart);
+    for (int i = 8; i < 16; i++) schaakbord[i] = new Pion(zwart);
+    for (int i = 48; i < 56; i++) schaakbord[i] = new Pion(wit);
+    schaakbord[56] = new Toren(wit);
+    schaakbord[57] = new Paard(wit);
+    schaakbord[58] = new Loper(wit);
+    schaakbord[59] = new Koningin(wit);
+    koningWit = new Koning(wit);
+    schaakbord[60] = koningWit;
+    schaakbord[61] = new Loper(wit);
+    schaakbord[62] = new Paard(wit);
+    schaakbord[63] = new Toren(wit);
+    logState();
+}
+
+zw Game::getBeurt() const {return aanBeurt;}
+
+void Game::setBeurt(zw kleur) {aanBeurt = kleur;}
+
+bool Game::getFinished() const {return finished;}
+
+void Game::setFinished(bool f) {finished = f;}
+
+// Geeft een pointer naar het schaakstuk dat op rij r, kolom k staat
+// Als er geen schaakstuk staat op deze positie, geef nullptr terug
+SchaakStuk* Game::getPiece(int r, int k) {return schaakbord[r*8 + k];}
+
+// Zet het schaakstuk waar s naar verwijst neer op rij r, kolom k.
+// Als er al een schaakstuk staat, wordt het overschreven.
+// Bewaar in jouw datastructuur de *pointer* naar het schaakstuk,
+// niet het schaakstuk zelf.
+void Game::setPiece(int r, int k, SchaakStuk* s) {
+    schaakbord[r*8 + k] = s;
+}
+
+// Geeft alle stukken van `kleur` die nog op het bord staan
+vector<SchaakStuk*> Game::getPieces(zw kleur) {
+    vector<SchaakStuk*> pieces;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            SchaakStuk* piece = Game::getPiece(i, j);
+            if (piece != nullptr && piece->getKleur() == kleur) pieces.push_back(piece);
+        }
+    }
+    return pieces;
+}
+
+// Zet `koning` als de variabele `koningWit` of `koningZwart`
+void Game::setKoning(zw kleur, SchaakStuk* koning) {
+    if (kleur == wit) koningWit = koning;
+    else koningZwart = koning;
+}
+
+// Geeft de pion die mogelijk en passant gezet zou kunnen worden
+SchaakStuk *Game::getPionVoorEP() {return pionVoorEP;}
+
+// Verwijdert alle stukken van het schaakbord
+void Game::clearBord() {
+    for (int i = 0; i < 64; i++) {
+        delete schaakbord[i];
+        schaakbord[i] = nullptr;
+    }
+    koningWit = koningZwart = nullptr;
+}
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+// Verplaats stuk s naar positie (r, k)
+// Als deze move niet mogelijk is, wordt de juiste soort error teruggegeven
+// en verandert er niets aan het schaakbord (uitgezonderd bij schaakmat. Dan wordt de zet wel gemaakt).
+// Anders wordt de move uitgevoerd en wordt true teruggegeven
+bool Game::move(SchaakStuk* s, int r, int k) {
+    // huidige locatie van het stuk bewaren
+    pair<int, int> loc = s->getLocation(*this);
+    // mogelijke zetten van het stuk verzamelen
+    vector<pair<int, int>> mogelijke_zetten = s->geldige_zetten(*this);
+    // aangeklikte locatie in een pair<int, int> zetten
+    pair<int, int> vergelijker = {r, k};
+
+    // controleren of de aangeklikte locatie een geldige zet is
+    if (any_of(mogelijke_zetten.begin(), mogelijke_zetten.end(), [vergelijker](pair<int, int> i){return i == vergelijker;})) {
+        // het stuk dat eventueel gepakt zou worden opslaan als stuk_op_loc
+        SchaakStuk *stuk_op_loc = Game::getPiece(r, k);
+        // de huidige locatie leeg maken
+        Game::setPiece(loc.first, loc.second, nullptr);
+        // het stuk verplaatsen naar de nieuwe locatie
+        Game::setPiece(r, k, s);
+
+        zw kleur = s->getKleur();
+        zw kleur_inv = wit;
+        if (kleur == wit) kleur_inv = zwart;
+        // nakijken of de speler die juist (probeerde) te zetten zichzelf niet schaak heeft gezet/laten staan
+        if (Game::schaak(kleur)) {
+            // nakijken of de speler zijn tegenstander schaakmat heeft gezet
+            if (Game::schaakmat(kleur_inv)) {
+                s->setMoved(true);
+                delete stuk_op_loc;
+                finished = true;
+                logState();
+                // throw een schaakMatError
+                throw schaakMatError(kleur);
+            }
+            // als de speler schaak staat moet de zet ongedaan gemaakt worden
+            Game::setPiece(loc.first, loc.second, s);
+            Game::setPiece(r, k, stuk_op_loc);
+            // throw een schaakError
+            throw schaakError();
+        }
+
+        // nakijken of de speler zijn tegenstander pat heeft gezet
+        if (Game::pat(kleur_inv)) {
+            s->setMoved(true);
+            delete stuk_op_loc;
+            finished = true;
+            logState();
+            // throw een patError
+            throw patError();
+        }
+
+        // en passant
+        // https://stackoverflow.com/questions/1330550/c-compare-char-array-with-string
+        if ((strcmp(s->type(), "Pw") == 0 || strcmp(s->type(), "Pb") == 0) && not s->getMoved()) {
+            pionVoorEP = s;
+        } else if (stuk_op_loc == nullptr && madePassantMove({r, k}, s)) {
+            if (s->getKleur() == wit) {
+                stuk_op_loc = Game::getPiece(r+1, k);
+                Game::setPiece(r+1, k, nullptr);
+            }
+            else {
+                stuk_op_loc = Game::getPiece(r-1, k);
+                Game::setPiece(r-1, k, nullptr);
+            }
+            pionVoorEP = nullptr;
+        } else pionVoorEP = nullptr;
+
+        // grote rokade
+        vergelijker = {loc.first, loc.second-2};
+        if ((strcmp(s->type(), "Kw") == 0 || strcmp(s->type(), "Kb") == 0) && Game::getKoning(kleur)->getLocation(*this) == vergelijker) {
+            SchaakStuk* toren = Game::getPiece(r, 0);
+            Game::setPiece(r, k+1, toren);
+            Game::setPiece(r, 0, nullptr);
+            toren->setMoved(true);
+        }
+        vergelijker = {loc.first, loc.second+2};
+        if ((strcmp(s->type(), "Kw") == 0 || strcmp(s->type(), "Kb") == 0) && Game::getKoning(kleur)->getLocation(*this) == vergelijker) {
+            SchaakStuk* toren = Game::getPiece(r, 7);
+            Game::setPiece(r, k-1, toren);
+            Game::setPiece(r, 7, nullptr);
+            toren->setMoved(true);
+        }
+
+        s->setMoved(true);
+        delete stuk_op_loc;
+        logState();
+        return true;
+    }
+    throw verplaatsingsError();
+}
+
+// Verander `aanBeurt` van kleur
+void Game::changeBeurt() {
+    if (aanBeurt == wit) aanBeurt = zwart;
+    else aanBeurt = wit;
+}
+
 // Geeft `true` terug als een stuk met kleur `kleur` geslagen zou kunnen worden op positie (r, k)
 bool Game::bedreigdVak(int r, int k, zw kleur) {
     SchaakStuk* temp = Game::getPiece(r, k);
@@ -264,12 +293,11 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     Game::setPiece(r, k, temp_piece);
     pair<int, int> vergelijker = {r, k};
 
-    zw kleur_inv;
+    zw kleur_inv = wit;
     if (kleur == wit) kleur_inv = zwart;
-    else kleur_inv = wit;
 
     vector<pair<int, int>> zetten;
-    for (auto i : Game::getPieces(kleur_inv)) for (auto j : i->geldige_zetten(*this)) zetten.push_back(j);
+    for (auto i : Game::getPieces(kleur_inv)) for (auto j : i->geldige_zetten(*this, true)) zetten.push_back(j);
 
     if (any_of(zetten.begin(), zetten.end(), [vergelijker](pair<int, int> i){return vergelijker == i;})) {
         Game::setPiece(r, k, temp);
@@ -280,13 +308,6 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     delete temp_piece;
     return false;
 }
-
-bool Game::madePassantMove(pair<int, int> move, SchaakStuk *s) {
-    if (s->getKleur() == wit && Game::getPiece(move.first+1, move.second) == pionVoorEP) return true;
-    if (s->getKleur() == zwart && Game::getPiece(move.first-1, move.second) == pionVoorEP) return true;
-    return false;
-}
-
 
 void Game::logState() {
     time += 1;

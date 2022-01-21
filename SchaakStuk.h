@@ -26,7 +26,7 @@ public:
 
     virtual Piece piece() const=0;
 
-    virtual vector<pair<int, int>> geldige_zetten(Game &g) = 0;
+    virtual vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) = 0;
     virtual const char* type() const = 0;   // https://www.geeksforgeeks.org/char-vs-stdstring-vs-char-c/
 };
 
@@ -37,7 +37,7 @@ public:
         return Piece(Piece::Pawn,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 
@@ -48,7 +48,7 @@ public:
         return Piece(Piece::Rook,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 
@@ -59,7 +59,7 @@ public:
         return Piece(Piece::Knight,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 
@@ -70,7 +70,7 @@ public:
         return Piece(Piece::Bishop,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 
@@ -81,7 +81,7 @@ public:
         return Piece(Piece::King,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 
@@ -92,7 +92,7 @@ public:
         return Piece(Piece::Queen,getKleur()==wit?Piece::White:Piece::Black);
     }
 
-    vector<pair<int, int>> geldige_zetten(Game &g) override;
+    vector<pair<int, int>> geldige_zetten(Game &g, bool intern = false) override;
     const char* type() const;
 };
 

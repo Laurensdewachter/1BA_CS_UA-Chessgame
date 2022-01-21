@@ -183,6 +183,7 @@ void SchaakGUI::open() {
     update();
     g.setFinished(false);
     g.deleteHistory();
+    g.logState();
     if (g.getBeurt() == wit) message("Wit is aan beurt");
     else message("Zwart is aan beurt");
 }
