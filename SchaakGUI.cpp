@@ -32,7 +32,7 @@ void SchaakGUI::clicked(int r, int k) {
     if (g.getFinished()) return;
     if (promotie) {
         if ((promotieKleur == wit && r == 4 && (k == 2 || k == 3 || k == 4 || k == 5))
-        || (promotieKleur == wit && r == 3 && (k == 2 || k == 3 || k == 4 || k == 5))) {
+        || (promotieKleur == zwart && r == 3 && (k == 2 || k == 3 || k == 4 || k == 5))) {
             g.promotie(k);
             update();
             g.changeBeurt();

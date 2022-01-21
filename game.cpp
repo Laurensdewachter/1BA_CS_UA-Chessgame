@@ -17,6 +17,8 @@ Game::Game() : aanBeurt(wit), finished(false), time(0) {
 
 Game::~Game() {
     Game::clearBord();
+    delete promotieWitBord[34], promotieWitBord[35], promotieWitBord[36], promotieWitBord[37],
+            promotieWitBord[26], promotieWitBord[27], promotieWitBord[28], promotieWitBord[29];
 }
 
 
@@ -346,6 +348,7 @@ void Game::promotie(int k) {
     if (k == 5) gekozen_stuk = new Koningin(Game::aanBeurt);
     delete Game::getPiece(promotielocatie.first, promotielocatie.second);
     Game::setPiece(promotielocatie.first, promotielocatie.second, gekozen_stuk);
+    Game::logState();
 }
 
 void Game::logState() {
@@ -412,7 +415,7 @@ void Game::goForward() {
         }
         else if (strcmp(history[time+1]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
         else if (strcmp(history[time+1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
-        if (strcmp(history[time+1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time-1]->eersteZetten[i]);
+        if (strcmp(history[time+1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time+1]->eersteZetten[i]);
     }
     if (time == 0) aanBeurt = wit;
     else if (history[time+1]->aanBeurt == wit) aanBeurt = zwart;
