@@ -6,7 +6,7 @@
 #include "guicode/fileIO.h"
 
 // Constructor
-SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true) {
+SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true), promotie(false) {
     g.setStartBord();
     SchaakGUI::update();
 }
@@ -22,12 +22,24 @@ void SchaakGUI::update() {
     }
 }
 
+void SchaakGUI::setPromotie(bool p) {promotie = p;}
+
 
 // Deze functie wordt opgeroepen telkens er op het schaakbord
 // geklikt wordt. x,y geeft de positie aan waar er geklikt
 // werd; r is de 0-based rij, k de 0-based kolom
 void SchaakGUI::clicked(int r, int k) {
     if (g.getFinished()) return;
+    if (promotie) {
+        if ((promotieKleur == wit && r == 4 && (k == 2 || k == 3 || k == 4 || k == 5))
+        || (promotieKleur == wit && r == 3 && (k == 2 || k == 3 || k == 4 || k == 5))) {
+            g.promotie(k);
+            update();
+            g.changeBeurt();
+            promotie = false;
+            firstClick = true;
+        } else return;
+    }
     if (firstClick) {
         // nakijken of het aangeklikte vak een stuk van de juiste kleur bevat
         if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
@@ -45,7 +57,7 @@ void SchaakGUI::clicked(int r, int k) {
                 return;
             } catch (schaakMatError& e) {
                 SchaakGUI::update();
-                SchaakGUI::clearTiles();
+                SchaakGUI::removeAllMarking();
                 if (e.getWinner() == wit) {
                     message("Schaakmat! Wit heeft gewonnen");
                 }
@@ -56,12 +68,19 @@ void SchaakGUI::clicked(int r, int k) {
             } catch (verplaatsingsError& e) {return;}
             catch (patError& e) {
                 SchaakGUI::update();
-                SchaakGUI::clearTiles();
+                SchaakGUI::removeAllMarking();
                 message("Gelijkspel!");
+            }
+            catch (promotieError& e) {
+                promotieKleur = e.what();
+                promotie = true;
+                SchaakGUI::update();
+                SchaakGUI::removeAllMarking();
+                return;
             }
             g.changeBeurt();
         }
-        SchaakGUI::clearTiles();
+        SchaakGUI::removeAllMarking();
         firstClick = true;
     }
     SchaakGUI::update();
@@ -86,16 +105,6 @@ void SchaakGUI::visualize(int r, int k, SchaakStuk* s) {
     }
 }
 
-void SchaakGUI::clearTiles() {
-    SchaakGUI::setTileSelect(selectedTile.first, selectedTile.second, false);
-    for (auto i : focusedTiles) SchaakGUI::setTileFocus(i.first, i.second, false);
-    for (auto i : threatenedPieces) SchaakGUI::setPieceThreat(i.first, i.second, false);
-    for (auto i : threatenedTiles) {
-        SchaakGUI::setTileThreat(i.first, i.second, false);
-        SchaakGUI::setTileFocus(i.first, i.second, false);
-    }
-}
-
 
 void SchaakGUI::newGame() {
     if (QMessageBox::Yes == QMessageBox::question(this,
@@ -105,7 +114,7 @@ void SchaakGUI::newGame() {
         g.clearBord();
         g.setStartBord();
         firstClick = true;
-        SchaakGUI::clearTiles();
+        SchaakGUI::removeAllMarking();
         SchaakGUI::update();
     }
 }
@@ -194,7 +203,7 @@ void SchaakGUI::undo() {
     } catch (undoRedoError& e) {return;}
     firstClick = true;
     SchaakGUI::update();
-    SchaakGUI::clearTiles();
+    SchaakGUI::removeAllMarking();
 }
 
 void SchaakGUI::redo() {
@@ -203,12 +212,12 @@ void SchaakGUI::redo() {
     } catch (undoRedoError& e) {return;}
     firstClick = true;
     SchaakGUI::update();
-    SchaakGUI::clearTiles();
+    SchaakGUI::removeAllMarking();
 }
 
 void SchaakGUI::visualizationChange() {
     if (not firstClick) {
-        clearTiles();
-        visualize(selectedTile.first, selectedTile.second, selectedPiece);
+        SchaakGUI::removeAllMarking();
+        SchaakGUI::visualize(selectedTile.first, selectedTile.second, selectedPiece);
     }
 }

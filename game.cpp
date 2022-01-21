@@ -2,8 +2,18 @@
 //  Rolnummer: r0214686
 
 #include "game.h"
+#include "SchaakGUI.h"
 
-Game::Game() : aanBeurt(wit), finished(false), time(0) {}
+Game::Game() : aanBeurt(wit), finished(false), time(0) {
+    promotieWitBord[34] = new Toren(wit);
+    promotieWitBord[35] = new Paard(wit);
+    promotieWitBord[36] = new Loper(wit);
+    promotieWitBord[37] = new Koningin(wit);
+    promotieZwartBord[26] = new Toren(zwart);
+    promotieZwartBord[27] = new Paard(zwart);
+    promotieZwartBord[28] = new Loper(zwart);
+    promotieZwartBord[29] = new Koningin(zwart);
+}
 
 Game::~Game() {
     Game::clearBord();
@@ -109,6 +119,17 @@ bool Game::madePassantMove(pair<int, int> move, SchaakStuk *s) {
     if (s->getKleur() == wit && Game::getPiece(move.first+1, move.second) == pionVoorEP) return true;
     if (s->getKleur() == zwart && Game::getPiece(move.first-1, move.second) == pionVoorEP) return true;
     return false;
+}
+
+bool Game::promotieSetup(SchaakStuk* s) {
+    if ((strcmp(s->type(), "Pw") != 0 && strcmp(s->type(), "Pb") != 0) ||
+    (strcmp(s->type(), "Pw") == 0 && s->getLocation(*this).first != 0) ||
+    (strcmp(s->type(), "Pb") == 0 && s->getLocation(*this).first != 7)) return false;
+    promotielocatie = s->getLocation(*this);
+    temp = schaakbord;
+    if (s->getKleur() == wit) schaakbord = promotieWitBord;
+    else schaakbord = promotieZwartBord;
+    return true;
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
@@ -264,12 +285,19 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             Game::setPiece(r, 0, nullptr);
             toren->setMoved(true);
         }
+        // kleine rokade
         vergelijker = {loc.first, loc.second+2};
         if ((strcmp(s->type(), "Kw") == 0 || strcmp(s->type(), "Kb") == 0) && Game::getKoning(kleur)->getLocation(*this) == vergelijker) {
             SchaakStuk* toren = Game::getPiece(r, 7);
             Game::setPiece(r, k-1, toren);
             Game::setPiece(r, 7, nullptr);
             toren->setMoved(true);
+        }
+
+        if (Game::promotieSetup(s)) {
+            throw promotieError(kleur);
+            delete stuk_op_loc;
+            return true;
         }
 
         s->setMoved(true);
@@ -307,6 +335,17 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     Game::setPiece(r, k, temp);
     delete temp_piece;
     return false;
+}
+
+void Game::promotie(int k) {
+    schaakbord = temp;
+    SchaakStuk* gekozen_stuk;
+    if (k == 2) gekozen_stuk = new Toren(Game::aanBeurt);
+    if (k == 3) gekozen_stuk = new Paard(Game::aanBeurt);
+    if (k == 4) gekozen_stuk = new Loper(Game::aanBeurt);
+    if (k == 5) gekozen_stuk = new Koningin(Game::aanBeurt);
+    delete Game::getPiece(promotielocatie.first, promotielocatie.second);
+    Game::setPiece(promotielocatie.first, promotielocatie.second, gekozen_stuk);
 }
 
 void Game::logState() {

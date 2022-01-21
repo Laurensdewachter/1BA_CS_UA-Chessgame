@@ -14,6 +14,9 @@ struct Log;
 class Game {
 // variabelen om de status van het spel/bord te bewaren
     map<int, SchaakStuk*> schaakbord;
+    map<int, SchaakStuk*> temp;
+    map<int, SchaakStuk*> promotieWitBord;
+    map<int, SchaakStuk*> promotieZwartBord;
     SchaakStuk* koningWit;
     SchaakStuk* koningZwart;
     zw aanBeurt;
@@ -21,6 +24,7 @@ class Game {
     int time;
     map<int, Log*> history;
     SchaakStuk* pionVoorEP;
+    pair<int, int> promotielocatie;
 
     SchaakStuk* getKoning(zw kleur) const;
 
@@ -30,6 +34,7 @@ class Game {
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
 
     bool madePassantMove(pair<int, int> move, SchaakStuk* s);
+    bool promotieSetup(SchaakStuk* s);
 
 public:
     Game();
@@ -52,6 +57,7 @@ public:
     void changeBeurt();
 
     bool bedreigdVak(int r, int k, zw kleur);
+    void promotie(int k);
 
     void logState();
     void goBack();
@@ -94,6 +100,15 @@ public:
 class undoRedoError : public exception {
 public:
     undoRedoError() {}
+};
+
+class promotieError : public exception {
+private:
+    zw kleur;
+
+public:
+    promotieError(zw kleur) : kleur(kleur) {}
+    zw what() {return kleur;}
 };
 
 #endif //SCHAKEN_GAME_H

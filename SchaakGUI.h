@@ -8,12 +8,14 @@
 #include "SchaakStuk.h"
 #include <QMessageBox>
 #include <QAction>
+#include <QComboBox>
 #include <sstream>
 
 class SchaakGUI:public ChessWindow {
 public:
     SchaakGUI();
     void update();
+    void setPromotie(bool p);
 
 private:
     Game g;
@@ -23,10 +25,11 @@ private:
     vector<pair<int, int>> focusedTiles;
     vector<pair<int, int>> threatenedPieces;
     vector<pair<int, int>> threatenedTiles;
+    bool promotie;
+    zw promotieKleur;
 
     void clicked(int x, int y) override;
     void visualize(int r, int k, SchaakStuk* s);
-    void clearTiles();
 
     void newGame() override;
     void open() override;
