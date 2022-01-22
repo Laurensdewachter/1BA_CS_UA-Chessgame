@@ -117,6 +117,33 @@ bool Game::quickCheckSchaak(zw kleur, SchaakStuk *s, int r, int k) {
     return true;
 }
 
+// Kijkt na of de gegeven kleur schaakmat zou staan als stuk 's' verplaatst zou worden naar locatie (r, k)
+// deze functie verandert de locatie van het stuk enkel tijdelijk.
+// Het schaakbord op het einde van de functie is altijd identiek aan het schaakbord bij het begin van de functie
+bool Game::quickCheckSchaakMat(zw kleur, SchaakStuk *s, int r, int k) {
+    // plaats de huidige locatie van 's' in 'loc'
+    pair<int, int> loc = s->getLocation(*this);
+    // plaats het stuk dat momenteel op locatie 'r, k' staat (eventueel nullptr) in 'temp'
+    SchaakStuk* temp = Game::getPiece(r, k);
+    // verplaats 's' naar 'r, k'
+    Game::setPiece(r, k, s);
+    // maak de oude locatie van 's' leeg
+    Game::setPiece(loc.first, loc.second, nullptr);
+    // kijk na of de gegeven kleur schaak staat
+    if (not schaakmat(kleur)) {
+        // zet het schaakbord terug naar zijn originele vorm
+        Game::setPiece(loc.first, loc.second, s);
+        Game::setPiece(r, k, temp);
+        // het stuk zou niet schaak staan dus return 'false'
+        return false;
+    }
+    // zet het schaakbord terug naar zijn originele vorm
+    Game::setPiece(loc.first, loc.second, s);
+    Game::setPiece(r, k, temp);
+    // het stuk zou wel schaak staan dus return 'true'
+    return true;
+}
+
 
 bool Game::madePassantMove(pair<int, int> move, SchaakStuk *s) {
     if (s->getKleur() == wit && Game::getPiece(move.first+1, move.second) == pionVoorEP) return true;
@@ -340,7 +367,13 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     return false;
 }
 
-void Game::promotie(int k) {
+void Game::promotie(int k, bool AI) {
+    if (AI) {
+        schaakbord = temp;
+        delete Game::getPiece(promotielocatie.first, promotielocatie.second);
+        Game::setPiece(promotielocatie.first, promotielocatie.second, new Koningin(zwart));
+        Game::logState();
+    }
     schaakbord = temp;
     SchaakStuk* gekozen_stuk;
     if (k == 2) gekozen_stuk = new Toren(Game::aanBeurt);
@@ -433,6 +466,49 @@ void Game::deleteHistory() {
     }
     time = 0;
 }
+
+
+void Game::AIMove() {
+    map<SchaakStuk*, pair<int, int>> schaak;
+    map<SchaakStuk*, pair<int, int>> aanvallers;
+    map<SchaakStuk*, pair<int, int>> willekeurig;
+
+    // alle mogelijke zetten in de juiste map plaatsen
+    for (auto piece : Game::getPieces(zwart)) {
+        for (auto zet : piece->geldige_zetten(*this)) {
+            if (Game::quickCheckSchaakMat(wit, piece, zet.first, zet.second)) {
+                Game::move(piece, zet.first, zet.second);
+                return;
+            } if (Game::quickCheckSchaak(wit, piece, zet.first, zet.second)) schaak[piece] = zet;
+            else if (Game::getPiece(zet.first, zet.second) != nullptr) aanvallers[piece] = zet;
+            else willekeurig[piece] = zet;
+        }
+    }
+
+    // random element uit een map kiezen
+    // https://stackoverflow.com/questions/15425442/retrieve-random-key-element-for-stdmap-in-c
+    if (not schaak.empty()) {
+        auto it = schaak.begin();
+        advance(it, random()%schaak.size());
+        SchaakStuk* gekozenStuk = it->first;
+        pair<int, int> loc = it->second;
+        Game::move(gekozenStuk, loc.first, loc.second);
+        return;
+    } if (not aanvallers.empty()) {
+        auto it = aanvallers.begin();
+        advance(it, random()%aanvallers.size());
+        SchaakStuk* gekozenStuk = it->first;
+        pair<int, int> loc = it->second;
+        Game::move(gekozenStuk, loc.first, loc.second);
+        return;
+    }
+    auto it = willekeurig.begin();
+    advance(it, random()%willekeurig.size());
+    SchaakStuk* gekozenStuk = it->first;
+    pair<int, int> loc = it->second;
+    Game::move(gekozenStuk, loc.first, loc.second);
+}
+
 
 Log::Log(map<int, SchaakStuk*> &s, zw b, int t) {
     for (int i = 0; i < 64; i++) {

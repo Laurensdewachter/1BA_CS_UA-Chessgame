@@ -35,6 +35,7 @@ void SchaakGUI::clicked(int r, int k) {
             update();
             g.changeBeurt();
             promotie = false;
+            if (AIOn) g.AIMove();
             firstClick = true;
         } else return;
     }
@@ -85,7 +86,8 @@ void SchaakGUI::clicked(int r, int k) {
                 SchaakGUI::removeAllMarking();
                 return;
             }
-            g.changeBeurt();
+            if (AIOn) g.AIMove();
+            else g.changeBeurt();
         }
         SchaakGUI::removeAllMarking();
         firstClick = true;

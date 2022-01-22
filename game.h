@@ -32,6 +32,7 @@ class Game {
     bool schaakmat(zw kleur);
     bool pat(zw kleur);
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
+    bool quickCheckSchaakMat(zw kleur, SchaakStuk* s, int r, int k);
 
     bool madePassantMove(pair<int, int> move, SchaakStuk* s);
     bool promotieSetup(SchaakStuk* s);
@@ -57,12 +58,14 @@ public:
     void changeBeurt();
 
     bool bedreigdVak(int r, int k, zw kleur);
-    void promotie(int k);
+    void promotie(int k, bool AI = false);
 
     void logState();
     void goBack();
     void goForward();
     void deleteHistory();
+
+    void AIMove();
 };
 
 struct Log {
