@@ -224,7 +224,10 @@ void SchaakGUI::redo() {
     SchaakGUI::removeAllMarking();
 }
 
-void SchaakGUI::visualizationChange() {
-    SchaakGUI::visualize(selectedTile.first, selectedTile.second, selectedPiece);
 
+void SchaakGUI::visualizationChange() {SchaakGUI::visualize(selectedTile.first, selectedTile.second, selectedPiece);}
+
+void SchaakGUI::AIChange() {
+    if (SchaakGUI::AIPlayer()) AIOn = true;
+    else AIOn = false;
 }

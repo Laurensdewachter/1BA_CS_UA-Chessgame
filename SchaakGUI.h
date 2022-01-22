@@ -25,6 +25,7 @@ private:
     vector<pair<int, int>> threatenedTiles;
     bool promotie;
     zw promotieKleur;
+    bool AIOn;
 
     void update();
     void clicked(int x, int y) override;
@@ -35,7 +36,10 @@ private:
     void save() override;
     void undo() override;
     void redo() override;
+
     void visualizationChange() override;
+    void AIChange() override;
+
 /*  Overgeërfde functies van ChessWindow:
 
     void removeAllMarking();

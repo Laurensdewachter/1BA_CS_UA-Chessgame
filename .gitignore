@@ -1,5 +1,4 @@
 cmake-build-debug/
-guicode/
 resources/
 .idea/
 CMakeLists.txt
