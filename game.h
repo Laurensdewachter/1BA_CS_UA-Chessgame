@@ -61,8 +61,8 @@ public:
     void promotie(int k, bool AI = false);
 
     void logState();
-    void goBack();
-    void goForward();
+    void goBack(bool AIOn = false);
+    void goForward(bool AIOn = false);
     void deleteHistory();
 
     void AIMove();

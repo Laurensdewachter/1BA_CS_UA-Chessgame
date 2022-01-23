@@ -69,7 +69,7 @@ void ChessWindow::createActions() {
     AI= new QAction(tr("AI &player"), this);
     AI->setStatusTip(tr("enable AI player (black)"));
     AI->setCheckable(true);
-    AI->setChecked(false);
+    AI->setChecked(true);
     connect(AI, &QAction::triggered, this, &ChessWindow::slot_AIChange);
 }
 

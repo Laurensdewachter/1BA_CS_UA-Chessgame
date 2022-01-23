@@ -8,7 +8,7 @@
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 // Constructor
-SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true), promotie(false) {SchaakGUI::update();}
+SchaakGUI::SchaakGUI():ChessWindow(nullptr), firstClick(true), promotie(false), AIOn(true) {SchaakGUI::update();}
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
@@ -210,7 +210,7 @@ void SchaakGUI::open() {
 
 void SchaakGUI::undo() {
     try {
-        g.goBack();
+        g.goBack(AIOn);
     } catch (undoRedoError& e) {return;}
     firstClick = true;
     SchaakGUI::update();
@@ -219,7 +219,7 @@ void SchaakGUI::undo() {
 
 void SchaakGUI::redo() {
     try {
-        g.goForward();
+        g.goForward(AIOn);
     } catch (undoRedoError& e) {return;}
     firstClick = true;
     SchaakGUI::update();

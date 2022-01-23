@@ -397,65 +397,76 @@ void Game::logState() {
     history[time] = new struct Log(schaakbord, aanBeurt, time);
 }
 
-void Game::goBack() {
-    if (time-1 < 1 || finished) throw undoRedoError();
+void Game::goBack(bool AIOn) {
+    int x = 1;
+    if (AIOn) x = 2;
+    if (time - x < 1 || finished) throw undoRedoError();
     clearBord();
     for (int i = 0; i < 64; i++) {
-        if (strcmp(history[time-1]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
-        if (strcmp(history[time-1]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
-        else if (strcmp(history[time-1]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
-        else if (strcmp(history[time-1]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
-        else if (strcmp(history[time-1]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
-        else if (strcmp(history[time-1]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
-        else if (strcmp(history[time-1]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
-        else if (strcmp(history[time-1]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
-        else if (strcmp(history[time-1]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
-        else if (strcmp(history[time-1]->schaakbord[i], "Kw") == 0) {
+        if (strcmp(history[time - x]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
+        if (strcmp(history[time - x]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
+        else if (strcmp(history[time - x]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
+        else if (strcmp(history[time - x]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
+        else if (strcmp(history[time - x]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
+        else if (strcmp(history[time - x]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
+        else if (strcmp(history[time - x]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
+        else if (strcmp(history[time - x]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
+        else if (strcmp(history[time - x]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
+        else if (strcmp(history[time - x]->schaakbord[i], "Kw") == 0) {
             schaakbord[i] = new Koning(wit);
             koningWit = schaakbord[i];
-        }
-        else if (strcmp(history[time-1]->schaakbord[i], "Kb") == 0) {
+        } else if (strcmp(history[time - x]->schaakbord[i], "Kb") == 0) {
             schaakbord[i] = new Koning(zwart);
             koningZwart = schaakbord[i];
-        }
-        else if (strcmp(history[time-1]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
-        else if (strcmp(history[time-1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
-        if (strcmp(history[time-1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time-1]->eersteZetten[i]);
+        } else if (strcmp(history[time - x]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
+        else if (strcmp(history[time - x]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
+        if (strcmp(history[time - x]->schaakbord[i], ".") != 0)
+            schaakbord[i]->setMoved(history[time - x]->eersteZetten[i]);
     }
-    if (aanBeurt == wit) aanBeurt = zwart;
-    else aanBeurt = wit;
-    time -= 1;
+    if (AIOn) {
+        time -= 2;
+    } else {
+        if (aanBeurt == wit) aanBeurt = zwart;
+        else aanBeurt = wit;
+        time -= 1;
+    }
 }
 
-void Game::goForward() {
-    if (history[time+1] == nullptr || finished) throw undoRedoError();
+void Game::goForward(bool AIOn) {
+    int x = 1;
+    if (AIOn) x = 2;
+    if (history[time+x] == nullptr || finished) throw undoRedoError();
     clearBord();
     for (int i = 0; i < 64; i++) {
-        if (strcmp(history[time+1]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
-        else if (strcmp(history[time+1]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
-        else if (strcmp(history[time+1]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
-        else if (strcmp(history[time+1]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
-        else if (strcmp(history[time+1]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
-        else if (strcmp(history[time+1]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
-        else if (strcmp(history[time+1]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
-        else if (strcmp(history[time+1]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
-        else if (strcmp(history[time+1]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
-        else if (strcmp(history[time+1]->schaakbord[i], "Kw") == 0) {
+        if (strcmp(history[time+x]->schaakbord[i], ".") == 0) schaakbord[i] = nullptr;
+        else if (strcmp(history[time+x]->schaakbord[i], "Pw") == 0) schaakbord[i] = new Pion(wit);
+        else if (strcmp(history[time+x]->schaakbord[i], "Pb") == 0) schaakbord[i] = new Pion(zwart);
+        else if (strcmp(history[time+x]->schaakbord[i], "Rw") == 0) schaakbord[i] = new Toren(wit);
+        else if (strcmp(history[time+x]->schaakbord[i], "Rb") == 0) schaakbord[i] = new Toren(zwart);
+        else if (strcmp(history[time+x]->schaakbord[i], "Hw") == 0) schaakbord[i] = new Paard(wit);
+        else if (strcmp(history[time+x]->schaakbord[i], "Hb") == 0) schaakbord[i] = new Paard(zwart);
+        else if (strcmp(history[time+x]->schaakbord[i], "Bw") == 0) schaakbord[i] = new Loper(wit);
+        else if (strcmp(history[time+x]->schaakbord[i], "Bb") == 0) schaakbord[i] = new Loper(zwart);
+        else if (strcmp(history[time+x]->schaakbord[i], "Kw") == 0) {
             schaakbord[i] = new Koning(wit);
             koningWit = schaakbord[i];
         }
-        else if (strcmp(history[time+1]->schaakbord[i], "Kb") == 0) {
+        else if (strcmp(history[time+x]->schaakbord[i], "Kb") == 0) {
             schaakbord[i] = new Koning(zwart);
             koningZwart = schaakbord[i];
         }
-        else if (strcmp(history[time+1]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
-        else if (strcmp(history[time+1]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
-        if (strcmp(history[time+1]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time+1]->eersteZetten[i]);
+        else if (strcmp(history[time+x]->schaakbord[i], "Qw") == 0) schaakbord[i] = new Koningin(wit);
+        else if (strcmp(history[time+x]->schaakbord[i], "Qb") == 0) schaakbord[i] = new Koningin(zwart);
+        if (strcmp(history[time+x]->schaakbord[i], ".") != 0) schaakbord[i]->setMoved(history[time+x]->eersteZetten[i]);
     }
-    if (time == 0) aanBeurt = wit;
-    if (aanBeurt == wit) aanBeurt = zwart;
-    else aanBeurt = wit;
-    time += 1;
+    if (AIOn) {
+        time += 2;
+    } else {
+        if (time == 0) aanBeurt = wit;
+        if (aanBeurt == wit) aanBeurt = zwart;
+        else aanBeurt = wit;
+        time += 1;
+    }
 }
 
 void Game::deleteHistory() {
