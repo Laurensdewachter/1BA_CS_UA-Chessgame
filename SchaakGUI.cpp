@@ -46,20 +46,24 @@ void SchaakGUI::clicked(int r, int k) {
             SchaakGUI::visualize(r, k, selectedPiece);
             firstClick = false;
         }
-    } else {
+    }
+    else {
         pair<int, int> temp = {r, k};
+        // kijken of het aangeklikte cak niet hetzelfde vak is als bij de eerste klik
         if (temp != selectedPiece->getLocation(g)) {
+            // als een ander stuk (van de kleur) die aan de beurt is wordt aangeklikt, dan wordt dat stuk het
+            // geselecteerde stuk
             if (g.getPiece(r, k) != nullptr && g.getPiece(r, k)->getKleur() == g.getBeurt()) {
                 selectedPiece = g.getPiece(r, k);
                 SchaakGUI::visualize(r, k, selectedPiece);
                 return;
             }
-            try {
-                g.move(selectedPiece, r, k);
-            } catch (schaakError& e) {
-                message("Deze zet is ongeldig");
-                return;
-            } catch (schaakMatError& e) {
+            // probeer het stuk te verplaatsen
+            try {g.move(selectedPiece, r, k);}
+            // de speler zet zichzelf schaak of laat zichzelf schaak staan
+            catch (schaakError& e) {return;}
+            // schaakmat: het spel is gedaan
+            catch (schaakMatError& e) {
                 SchaakGUI::update();
                 SchaakGUI::removeAllMarking();
                 if (e.getWinner() == wit) {
@@ -69,24 +73,65 @@ void SchaakGUI::clicked(int r, int k) {
                     message("Schaakmat! Zwart heeft gewonnen");
                 }
                 return;
-            } catch (verplaatsingsError& e) {
-                SchaakGUI::removeAllMarking();
-                firstClick = true;
-                return;
             }
+            // gelijkspel
             catch (patError& e) {
                 SchaakGUI::update();
                 SchaakGUI::removeAllMarking();
                 message("Gelijkspel!");
             }
+            // de zet zorgt ervoor dat een van hun pionnen gepromoveerd kan worden
             catch (promotieError& e) {
+                if (e.what() == zwart && AIOn) {
+                    g.promotie(5);
+                    SchaakGUI::update();
+                }
                 promotieKleur = e.what();
                 promotie = true;
                 SchaakGUI::update();
                 SchaakGUI::removeAllMarking();
                 return;
             }
-            if (AIOn) g.AIMove();
+            // het aangeklikte vak is geen geldige zet
+            catch (verplaatsingsError& e) {
+                SchaakGUI::removeAllMarking();
+                firstClick = true;
+                return;
+            }
+
+            // als de AI aan staat maakt de AI een zet
+            if (AIOn && not g.getFinished()) {
+                try {g.AIMove();}
+                catch (schaakError& e) {}
+                catch (schaakMatError& e) {
+                    SchaakGUI::update();
+                    SchaakGUI::removeAllMarking();
+                    if (e.getWinner() == wit) {
+                        message("Schaakmat! Wit heeft gewonnen");
+                    }
+                    else {
+                        message("Schaakmat! Zwart heeft gewonnen");
+                    }
+                    return;
+                }
+                catch (patError& e) {
+                    SchaakGUI::update();
+                    SchaakGUI::removeAllMarking();
+                    message("Gelijkspel!");
+                }
+                catch (promotieError& e) {
+                    if (e.what() == zwart) {
+                        g.promotie(5);
+                        SchaakGUI::update();
+                    }
+                    promotieKleur = e.what();
+                    promotie = true;
+                    SchaakGUI::update();
+                    SchaakGUI::removeAllMarking();
+                    return;
+                }
+            }
+            // als de AI niet aanstaat, wordt de kleur die aan beurt is verwisselt
             else g.changeBeurt();
         }
         SchaakGUI::removeAllMarking();
@@ -124,6 +169,7 @@ void SchaakGUI::newGame() {
         g.deleteHistory();
         g.clearBord();
         g.setStartBord();
+        g.setFinished(false);
         firstClick = true;
         SchaakGUI::removeAllMarking();
         SchaakGUI::update();

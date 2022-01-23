@@ -14,7 +14,7 @@ struct Log;
 class Game {
 // variabelen om de status van het spel/bord te bewaren
     map<int, SchaakStuk*> schaakbord;
-    map<int, SchaakStuk*> temp;
+    map<int, SchaakStuk*> temp_schaakbord;
     map<int, SchaakStuk*> promotieWitBord;
     map<int, SchaakStuk*> promotieZwartBord;
     SchaakStuk* koningWit;
@@ -26,16 +26,15 @@ class Game {
     SchaakStuk* pionVoorEP;
     pair<int, int> promotielocatie;
 
-    SchaakStuk* getKoning(zw kleur) const;
-
     bool schaak(zw kleur);
     bool schaakmat(zw kleur);
     bool pat(zw kleur);
     bool quickCheckSchaak(zw kleur, SchaakStuk* s, int r, int k);
     bool quickCheckSchaakMat(zw kleur, SchaakStuk* s, int r, int k);
+    bool quickCheckPat(zw kleur, SchaakStuk* s, int r, int k);
 
     bool madePassantMove(pair<int, int> move, SchaakStuk* s);
-    bool promotieSetup(SchaakStuk* s);
+    bool promotieSetup(int r, int k, SchaakStuk* s);
 
 public:
     Game();
