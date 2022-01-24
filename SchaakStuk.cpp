@@ -4,8 +4,10 @@
 #include "SchaakStuk.h"
 #include "game.h"
 
+// geeft de kleur van een stuk
 zw SchaakStuk::getKleur() const {return kleur;}
 
+// geeft de locatie van een stuk
 pair<int, int> SchaakStuk::getLocation(Game &g) const {
     bool found = false;
     int r;
@@ -31,7 +33,7 @@ bool SchaakStuk::getMoved() const {return hasMoved;}
 
 void SchaakStuk::setMoved(bool m) {hasMoved = m;}
 
-
+// geeft een vector terug die alle geldige zetten van een stuk bevat
 vector<pair<int, int>> Pion::geldige_zetten(Game &g, bool intern) {
     vector<pair<int, int>> zetten;
     pair<int, int> loc = SchaakStuk::getLocation(g);
@@ -354,6 +356,7 @@ vector<pair<int, int>> Koningin::geldige_zetten(Game &g, bool intern) {
     return zetten;
 }
 
+// Geeft een char* terug afhankelijk van het type van het stuk
 const char* Pion::type() const {
     if (SchaakStuk::getKleur() == wit) return "Pw";
     return "Pb";

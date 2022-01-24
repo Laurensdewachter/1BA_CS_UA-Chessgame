@@ -11,19 +11,20 @@
 #include <QComboBox>
 #include <sstream>
 
+enum clicks{eersteClick, tweedeKlik, promotie};
+
 class SchaakGUI:public ChessWindow {
 public:
     SchaakGUI();
 
 private:
     Game g;
-    bool firstClick;
+    clicks state;
     SchaakStuk* selectedPiece;
     pair<int, int> selectedTile;
     vector<pair<int, int>> focusedTiles;
     vector<pair<int, int>> threatenedPieces;
     vector<pair<int, int>> threatenedTiles;
-    bool promotie;
     zw promotieKleur;
     bool AIOn;
 

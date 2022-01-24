@@ -180,6 +180,7 @@ bool Game::promotieSetup(int r, int k, SchaakStuk* s) {
     return true;
 }
 
+// Getters en setters
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 void Game::setStartBord() {
     aanBeurt = wit;
@@ -406,6 +407,7 @@ bool Game::bedreigdVak(int r, int k, zw kleur) {
     return false;
 }
 
+// Wordt opgeroepen als de speler een stuk heeft gekozen in de 'promotie-procedure'
 void Game::promotie(int k, bool AI) {
     if (AI) {
         schaakbord = temp_schaakbord;
@@ -413,17 +415,20 @@ void Game::promotie(int k, bool AI) {
         Game::setPiece(promotielocatie.first, promotielocatie.second, new Koningin(zwart));
         Game::logState();
     }
-    schaakbord = temp_schaakbord;
-    SchaakStuk* gekozen_stuk;
-    if (k == 2) gekozen_stuk = new Toren(Game::aanBeurt);
-    if (k == 3) gekozen_stuk = new Paard(Game::aanBeurt);
-    if (k == 4) gekozen_stuk = new Loper(Game::aanBeurt);
-    if (k == 5) gekozen_stuk = new Koningin(Game::aanBeurt);
-    delete Game::getPiece(promotielocatie.first, promotielocatie.second);
-    Game::setPiece(promotielocatie.first, promotielocatie.second, gekozen_stuk);
-    Game::logState();
+    else {
+        schaakbord = temp_schaakbord;
+        SchaakStuk *gekozen_stuk;
+        if (k == 2) gekozen_stuk = new Toren(Game::aanBeurt);
+        if (k == 3) gekozen_stuk = new Paard(Game::aanBeurt);
+        if (k == 4) gekozen_stuk = new Loper(Game::aanBeurt);
+        if (k == 5) gekozen_stuk = new Koningin(Game::aanBeurt);
+        delete Game::getPiece(promotielocatie.first, promotielocatie.second);
+        Game::setPiece(promotielocatie.first, promotielocatie.second, gekozen_stuk);
+        Game::logState();
+    }
 }
 
+// Slaagt de huidige staat van het spel op in een Log
 void Game::logState() {
     time += 1;
 
@@ -536,27 +541,29 @@ void Game::AIMove() {
         }
     }
 
-        pair<int, int> loc;
     // random element uit een map kiezen
     // https://stackoverflow.com/questions/15425442/retrieve-random-key-element-for-stdmap-in-c
+    SchaakStuk* gekozenStuk;
+    pair<int, int> loc;
+
     if (not schaak.empty()) {
         auto it = schaak.begin();
         advance(it, random() % schaak.size());
-        SchaakStuk* gekozenStuk = it->first;
+        gekozenStuk = it->first;
         loc = it->second;
-        return;
     }
-    if (not aanvallers.empty()) {
+    else if (not aanvallers.empty()) {
         auto it = aanvallers.begin();
         advance(it, random()%aanvallers.size());
-        SchaakStuk* gekozenStuk = it->first;
+        gekozenStuk = it->first;
         loc = it->second;
-        return;
     }
-    auto it = willekeurig.begin();
-    advance(it, random()%willekeurig.size());
-    SchaakStuk* gekozenStuk = it->first;
-    loc = it->second;
+    else {
+        auto it = willekeurig.begin();
+        advance(it, random() % willekeurig.size());
+        gekozenStuk = it->first;
+        loc = it->second;
+    }
 
     try {Game::move(gekozenStuk, loc.first, loc.second);}
     catch (schaakError &e) {
