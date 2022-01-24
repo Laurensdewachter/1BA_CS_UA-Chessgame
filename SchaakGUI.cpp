@@ -61,7 +61,9 @@ void SchaakGUI::clicked(int r, int k) {
             // probeer het stuk te verplaatsen
             try {g.move(selectedPiece, r, k);}
             // de speler zet zichzelf schaak of laat zichzelf schaak staan
-            catch (schaakError& e) {return;}
+            catch (schaakError& e) {
+                return;
+            }
             // schaakmat: het spel is gedaan
             catch (schaakMatError& e) {
                 SchaakGUI::update();
@@ -102,7 +104,6 @@ void SchaakGUI::clicked(int r, int k) {
             // als de AI aan staat maakt de AI een zet
             if (AIOn && not g.getFinished()) {
                 try {g.AIMove();}
-                catch (schaakError& e) {}
                 catch (schaakMatError& e) {
                     SchaakGUI::update();
                     SchaakGUI::removeAllMarking();

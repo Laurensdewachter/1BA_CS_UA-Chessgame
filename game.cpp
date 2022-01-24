@@ -49,16 +49,13 @@ bool Game::schaak(zw kleur) {
 
 // Geeft `true` als kleur schaakmat staat
 bool Game::schaakmat(zw kleur) {
-    // koning en locatie van koning in globale variabelen zetten
+    if (not Game::schaak(kleur)) return false;
+    // koning en locatie van koning in variabelen zetten
     SchaakStuk* koning;
     if (kleur == wit) koning = koningWit;
     else koning = koningZwart;
     pair<int, int> loc = koning->getLocation(*this);
-    // nakijken of de koning kan verplaatsen
-    for (auto i : koning->geldige_zetten(*this)) {
-        if (not Game::quickCheckSchaak(kleur, koning, i.first, i.second)) return false;
-    }
-    // nakijken of een ander stuk het aanvallende stuk kan blokkeren
+    // nakijken of een stuk is dat kan bewegen zodat de koning niet meer schaak staat
     // itereer over alle stukken van de "verdedigende" kleur
     for (auto i : Game::getPieces(kleur)) {
         // itereer over alle geldige zetten van stuk i
@@ -280,7 +277,7 @@ bool Game::move(SchaakStuk* s, int r, int k) {
 
         // nakijken of de speler die juist (probeerde) te zetten zichzelf niet schaak heeft gezet/laten staan
         if (Game::quickCheckSchaak(kleur, s, r, k)) {throw schaakError();}
-            // nakijken of de speler zijn tegenstander schaakmat heeft gezet
+        // nakijken of de speler zijn tegenstander schaakmat heeft gezet
         if (Game::quickCheckSchaakMat(kleur_inv, s, r, k)) {
             // de zet maken
             delete Game::getPiece(r, k);
@@ -307,27 +304,6 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             throw patError();
         }
 
-        // en passant
-        // https://stackoverflow.com/questions/1330550/c-compare-char-array-with-string
-        // nakijken of een pion zijn eerste zet heeft gemaakt
-        if ((strcmp(s->type(), "Pw") == 0 || strcmp(s->type(), "Pb") == 0) && not s->getMoved()) {
-            pionVoorEP = s;
-        }
-        // nakijken of de pion juist een andere pion en passant heeft gezet
-        else if (Game::getPiece(r, k) == nullptr && madePassantMove({r, k}, s)) {
-            if (s->getKleur() == wit) {
-                delete Game::getPiece(r+1, k);
-                Game::setPiece(r+1, k, nullptr);
-                Game::setPiece(r, k, s);
-            }
-            else {
-                delete Game::getPiece(r-1, k);
-                Game::setPiece(r-1, k, nullptr);
-                Game::setPiece(r, k, s);
-            }
-            pionVoorEP = nullptr;
-        } else pionVoorEP = nullptr;
-
         // grote rokade
         vergelijker = {s->getLocation(*this).first, s->getLocation(*this).second-2};
         pair<int, int> nieuwe_loc = {r, k};
@@ -339,6 +315,8 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             Game::setPiece(r, 0, nullptr);
             s->setMoved(true);
             toren->setMoved(true);
+            Game::logState();
+            return true;
         }
         // kleine rokade
         vergelijker = {loc.first, loc.second+2};
@@ -350,6 +328,8 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             Game::setPiece(r, 7, nullptr);
             s->setMoved(true);
             toren->setMoved(true);
+            Game::logState();
+            return true;
         }
 
         // promotie
@@ -357,13 +337,41 @@ bool Game::move(SchaakStuk* s, int r, int k) {
             throw promotieError(kleur);
         }
 
+        // en passant
+        // https://stackoverflow.com/questions/1330550/c-compare-char-array-with-string
+        // nakijken of een pion zijn eerste zet heeft gemaakt
+        if ((strcmp(s->type(), "Pw") == 0 || strcmp(s->type(), "Pb") == 0) && not s->getMoved()) {
+            pionVoorEP = s;
+        }
+            // nakijken of de pion juist een andere pion en passant heeft gezet
+        else if (Game::getPiece(r, k) == nullptr && madePassantMove({r, k}, s)) {
+            if (s->getKleur() == wit) {
+                delete Game::getPiece(r+1, k);
+                Game::setPiece(loc.first, loc.second, nullptr);
+                Game::setPiece(r+1, k, nullptr);
+                Game::setPiece(r, k, s);
+                Game::logState();
+                return true;
+            }
+            else {
+                delete Game::getPiece(r-1, k);
+                Game::setPiece(loc.first, loc.second, nullptr);
+                Game::setPiece(r-1, k, nullptr);
+                Game::setPiece(r, k, s);
+                Game::logState();
+                return true;
+            }
+            pionVoorEP = nullptr;
+        }
+        else pionVoorEP = nullptr;
+
         // gewone zet
         delete Game::getPiece(r, k);
         Game::setPiece(loc.first, loc.second, nullptr);
         Game::setPiece(r, k, s);
         s->setMoved(true);
 
-        logState();
+        Game::logState();
         return true;
     }
     throw verplaatsingsError();
@@ -528,29 +536,33 @@ void Game::AIMove() {
         }
     }
 
+        pair<int, int> loc;
     // random element uit een map kiezen
     // https://stackoverflow.com/questions/15425442/retrieve-random-key-element-for-stdmap-in-c
     if (not schaak.empty()) {
         auto it = schaak.begin();
         advance(it, random() % schaak.size());
         SchaakStuk* gekozenStuk = it->first;
-        pair<int, int> loc = it->second;
-        Game::move(gekozenStuk, loc.first, loc.second);
+        loc = it->second;
         return;
     }
     if (not aanvallers.empty()) {
         auto it = aanvallers.begin();
         advance(it, random()%aanvallers.size());
         SchaakStuk* gekozenStuk = it->first;
-        pair<int, int> loc = it->second;
-        Game::move(gekozenStuk, loc.first, loc.second);
+        loc = it->second;
         return;
     }
     auto it = willekeurig.begin();
     advance(it, random()%willekeurig.size());
     SchaakStuk* gekozenStuk = it->first;
-    pair<int, int> loc = it->second;
-    Game::move(gekozenStuk, loc.first, loc.second);
+    loc = it->second;
+
+    try {Game::move(gekozenStuk, loc.first, loc.second);}
+    catch (schaakError &e) {
+        Game::AIMove();
+        return;
+    }
 }
 
 
